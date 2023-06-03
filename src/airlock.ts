@@ -1,23 +1,23 @@
-import { Coord, coord, Commands, and, D, iff } from "./mcmd";
+import { Lever } from "./lever";
+import { Commands, and, iff } from "./mcmd";
+import { PressurePlate } from "./pressure_plate";
+import { Coord, Dir, cor } from "./coord";
 
 let c = new Commands("airlock_1");
 
-const pr_out = [5045, 227, 4960];
-const pr_in = [5040, 227, 4960];
+const pr_out = new PressurePlate(cor(5045, 227, 4960));
+const pr_in = new PressurePlate(cor(5040, 227, 4960));
 
-const lv_out = [5043, 228, 4959];
-const lv_out_dir = D.WEST;
+const lv_out = new Lever(cor(5043, 228, 4959), Dir.WEST);
 
-const lv_in = [5042, 228, 4959];
-const lv_in_dir = D.EAST;
+const lv_in = new Lever(cor(5042, 228, 4959), Dir.EAST);
 
-const lv_pres = [5043, 228, 4961];
-const lv_pres_dir = D.NORTH;
+const lv_pres = new Lever(cor(5043, 228, 4961), Dir.NORTH);
 
-const door_out = [5044, 227, 4960];
-const door_in = [5041, 227, 4960];
+const door_out = cor(5044, 227, 4960);
+const door_in = cor(5041, 227, 4960);
 
-const status_sign = [5072, 228, 4961];
+const status_sign = cor(5072, 228, 4961);
 
 enum Pressure {
     PRESURIZED = 0,
@@ -26,45 +26,21 @@ enum Pressure {
     DEPRESURIZING = 3,
 }
 
-function above(pos: Coord) {
-    return [pos[0], pos[1] + 1, pos[2]];
-}
-
-function lever_on(pos: Coord) {
-    return `block ${coord(pos)} minecraft:lever[powered=true]`;
-}
-
-function lever_off(pos: Coord) {
-    return `block ${coord(pos)} minecraft:lever[powered=false]`;
-}
-
-function pr_on(pos: Coord) {
-    return `block ${coord(pos)} minecraft:polished_blackstone_pressure_plate[powered=true]`;
-}
-
-function pr_off(pos: Coord) {
-    return `block ${coord(pos)} minecraft:polished_blackstone_pressure_plate[powered=false]`;
-}
-
-function set_lever(pos: Coord, dir: D, on: boolean) {
-    return `setblock ${coord(pos)} minecraft:lever[facing=${dir},powered=${on}]`;
-}
-
 let pressurized = c.var_int("pressurized");
 
 function close_door(pos: Coord) {
     return [
-        `setblock ${coord(pos)} minecraft:stone`,
-        `setblock ${coord(above(pos))} minecraft:stone`,
+        `setblock ${pos.raw()} minecraft:white_concrete`,
+        `setblock ${pos.above().raw()} minecraft:black_stained_glass`,
     ];
 }
 
 function open_door(pos: Coord) {
-    return [`setblock ${coord(pos)} minecraft:air`, `setblock ${coord(above(pos))} minecraft:air`];
+    return [`setblock ${pos.raw()} minecraft:air`, `setblock ${pos.above().raw()} minecraft:air`];
 }
 
 function set_sign(pos: Coord, text: string, color: string) {
-    return `data merge block ${coord(pos)} {Text2:'{\\"text\\":\\"${text}\\"}'}`;
+    return `data merge block ${pos.raw()} {Text2:'{\\"text\\":\\"${text}\\"}'}`;
 }
 
 let pres_trigger = c.mk_trigger();
@@ -76,27 +52,22 @@ pres_trigger.at(0).with((c) => {
         iff(pressurized.eq(Pressure.PRESSURIZING)),
         iff(pressurized.eq(Pressure.DEPRESURIZING))
     ).with((c) => {
-        c.repeat(set_lever(lv_pres, lv_pres_dir, true));
+        c.repeat(lv_pres.set_on());
     });
 
     c.execute(iff(pressurized.eq(Pressure.DEPRESURIZED))).with((c) => {
         c.impulse(pressurized.set(Pressure.PRESSURIZING));
-        c.impulse(set_sign(status_sign, "Pressurizing", "red"));
-        c.impulse(`bossbar set minecraft:airlock_1 name \\"Pressurizing...\\"`);
     });
 
     c.execute(iff(pressurized.eq(Pressure.PRESURIZED))).with((c) => {
         c.impulse(pressurized.set(Pressure.DEPRESURIZING));
-        c.impulse(set_sign(status_sign, "Depressurizing", "red"));
-        c.impulse(`bossbar set minecraft:airlock_1 name \\"Depressurizing...\\"`);
     });
 
     c.impulse("bossbar set minecraft:airlock_1 color red");
-    c.impulse("bossbar set minecraft:airlock_1 value 0");
     c.impulse("bossbar set minecraft:airlock_1 visible true");
 });
 
-for (let i = 10; i <= 90; i += 10) {
+for (let i = 0; i <= 100; i += 10) {
     pres_trigger.at(i * time_scale).with((c) => {
         c.impulse(`bossbar set minecraft:airlock_1 value ${i}`);
     });
@@ -104,17 +75,12 @@ for (let i = 10; i <= 90; i += 10) {
 
 pres_trigger.at(100 * time_scale).with((c) => {
     c.impulse("bossbar set minecraft:airlock_1 color green");
-    c.impulse("bossbar set minecraft:airlock_1 value 100");
-    c.impulse(set_lever(lv_pres, lv_pres_dir, false));
+    c.impulse(lv_pres.set_off());
     c.execute(iff(pressurized.eq(Pressure.PRESSURIZING))).with((c) => {
-        c.impulse(pressurized.set(Pressure.PRESURIZED)).impulse(
-            set_sign(status_sign, "Pressurized", "green")
-        );
+        c.impulse(pressurized.set(Pressure.PRESURIZED));
     });
     c.execute(iff(pressurized.eq(Pressure.DEPRESURIZING))).with((c) => {
-        c.impulse(pressurized.set(Pressure.DEPRESURIZED)).impulse(
-            set_sign(status_sign, "Depressurized", "green")
-        );
+        c.impulse(pressurized.set(Pressure.DEPRESURIZED));
     });
 });
 
@@ -126,102 +92,122 @@ pres_trigger.at(120 * time_scale).with((c) => {
 });
 
 // Enter from outside, set depressurized
-c.execute(iff(pr_on(pr_out))).with((c) => {
+c.execute(iff(pr_out.is_on())).with((c) => {
     c.repeat(pressurized.set(Pressure.DEPRESURIZED));
-    c.repeat(set_sign(status_sign, "Depressurized", "green"));
     c.repeat_all(open_door(door_out));
-    c.repeat(set_lever(lv_out, lv_out_dir, false));
+    c.repeat(lv_out.set_off());
 });
 
 // Enter from inside, set pressurized
-c.execute(iff(pr_on(pr_in))).with((c) => {
+c.execute(iff(pr_in.is_on())).with((c) => {
     c.repeat(pressurized.set(Pressure.PRESURIZED));
-    c.repeat(set_sign(status_sign, "Pressurized", "green"));
     c.repeat_all(open_door(door_in));
-    c.repeat(set_lever(lv_in, lv_in_dir, false));
+    c.repeat(lv_in.set_off());
 });
 
 // close doors
-c.execute(and(iff(pr_off(pr_out)), iff(lever_off(lv_out)))).with((c) => {
+c.execute(and(iff(pr_out.is_off()), iff(lv_out.is_off()))).with((c) => {
     c.repeat_all(close_door(door_out));
 });
 
-c.execute(and(iff(pr_off(pr_in)), iff(lever_off(lv_in)))).with((c) => {
+c.execute(and(iff(pr_in.is_off()), iff(lv_in.is_off()))).with((c) => {
     c.repeat_all(close_door(door_in));
 });
 
 // if lv_out is on and not pressurized
-c.execute(and(iff(lever_on(lv_out)), iff(pressurized.eq(Pressure.DEPRESURIZED)))).with((c) => {
+c.execute(and(iff(lv_out.is_on()), iff(pressurized.eq(Pressure.DEPRESURIZED)))).with((c) => {
     c.repeat_all(open_door(door_out));
 });
 
 c.execute(
-    and(iff(lever_on(lv_out)), iff(pressurized.eq(Pressure.PRESURIZED))),
-    and(iff(lever_on(lv_out)), iff(pressurized.eq(Pressure.PRESSURIZING))),
-    and(iff(lever_on(lv_out)), iff(pressurized.eq(Pressure.DEPRESURIZING)))
+    and(iff(lv_out.is_on()), iff(pressurized.eq(Pressure.PRESURIZED))),
+    and(iff(lv_out.is_on()), iff(pressurized.eq(Pressure.PRESSURIZING))),
+    and(iff(lv_out.is_on()), iff(pressurized.eq(Pressure.DEPRESURIZING)))
 ).with((c) => {
-    c.repeat(set_lever(lv_out, lv_out_dir, false));
+    c.repeat(lv_out.set_off());
 });
 
 c.execute(
-    and(iff(lever_on(lv_in)), iff(pressurized.eq(Pressure.DEPRESURIZED))),
-    and(iff(lever_on(lv_in)), iff(pressurized.eq(Pressure.PRESSURIZING))),
-    and(iff(lever_on(lv_in)), iff(pressurized.eq(Pressure.DEPRESURIZING)))
+    and(iff(lv_in.is_on()), iff(pressurized.eq(Pressure.DEPRESURIZED))),
+    and(iff(lv_in.is_on()), iff(pressurized.eq(Pressure.PRESSURIZING))),
+    and(iff(lv_in.is_on()), iff(pressurized.eq(Pressure.DEPRESURIZING)))
 ).with((c) => {
-    c.repeat(set_lever(lv_in, lv_in_dir, false));
+    c.repeat(lv_in.set_off());
 });
 
 // if lv_in is on and pressurized
-c.execute(and(iff(lever_on(lv_in)), iff(pressurized.eq(Pressure.PRESURIZED)))).with((c) => {
+c.execute(and(iff(lv_in.is_on()), iff(pressurized.eq(Pressure.PRESURIZED)))).with((c) => {
     c.repeat_all(open_door(door_in));
 });
 
-c.execute(and(iff(lever_on(lv_out)), iff(lever_on(lv_pres)))).with((c) => {
-    c.repeat(set_lever(lv_pres, lv_pres_dir, false));
+c.execute(and(iff(lv_out.is_on()), iff(lv_pres.is_on()))).with((c) => {
+    c.repeat(lv_pres.set_off());
 });
 
-c.execute(and(iff(lever_on(lv_in)), iff(lever_on(lv_pres)))).with((c) => {
-    c.repeat(set_lever(lv_pres, lv_pres_dir, false));
+c.execute(and(iff(lv_in.is_on()), iff(lv_pres.is_on()))).with((c) => {
+    c.repeat(lv_pres.set_off());
 });
 
 c.execute(
     and(
         iff(pressurized.eq(Pressure.DEPRESURIZED)),
-        iff(lever_on(lv_out)),
-        iff(lever_off(lv_in)),
-        iff(lever_on(lv_pres))
+        iff(lv_out.is_on()),
+        iff(lv_in.is_off()),
+        iff(lv_pres.is_on())
     ),
     and(
         iff(pressurized.eq(Pressure.DEPRESURIZED)),
-        iff(lever_off(lv_out)),
-        iff(lever_on(lv_in)),
-        iff(lever_on(lv_pres))
+        iff(lv_out.is_off()),
+        iff(lv_in.is_on()),
+        iff(lv_pres.is_on())
     ),
     and(
         iff(pressurized.eq(Pressure.DEPRESURIZED)),
-        iff(lever_on(lv_out)),
-        iff(lever_on(lv_in)),
-        iff(lever_on(lv_pres))
+        iff(lv_out.is_on()),
+        iff(lv_in.is_on()),
+        iff(lv_pres.is_on())
     )
 ).with((c) => {
-    c.repeat(set_lever(lv_pres, lv_pres_dir, false));
+    c.repeat(lv_pres.set_off());
 });
 
 c.execute(
     and(
         iff(pressurized.eq(Pressure.DEPRESURIZED)),
-        iff(lever_off(lv_out)),
-        iff(lever_off(lv_in)),
-        iff(lever_on(lv_pres))
+        iff(lv_out.is_off()),
+        iff(lv_in.is_off()),
+        iff(lv_pres.is_on())
     ),
     and(
         iff(pressurized.eq(Pressure.PRESURIZED)),
-        iff(lever_off(lv_out)),
-        iff(lever_off(lv_in)),
-        iff(lever_on(lv_pres))
+        iff(lv_out.is_off()),
+        iff(lv_in.is_off()),
+        iff(lv_pres.is_on())
     )
 ).with((c) => {
     c.repeat(pres_trigger.trigger());
 });
 
-c.build([4930, 166, 4943]);
+c.execute(
+    and(
+        iff(pressurized.eq(Pressure.DEPRESURIZED)),
+        iff(lv_out.is_off()),
+        iff(lv_in.is_off()),
+        iff(lv_pres.is_on())
+    )
+).with((c) => {
+    c.repeat(`bossbar set minecraft:airlock_1 name \\"Pressurizing...\\"`);
+});
+
+c.execute(
+    and(
+        iff(pressurized.eq(Pressure.PRESURIZED)),
+        iff(lv_out.is_off()),
+        iff(lv_in.is_off()),
+        iff(lv_pres.is_on())
+    )
+).with((c) => {
+    c.repeat(`bossbar set minecraft:airlock_1 name \\"Depressurizing...\\"`);
+});
+
+c.build(cor(4930, 166, 4943));
