@@ -17,6 +17,8 @@ const lv_pres_dir = D.NORTH;
 const door_out = [5044, 227, 4960]
 const door_in = [5041, 227, 4960]
 
+const status_sign = [5072, 228, 4961]
+
 enum Pressure {
     PRESURIZED = 0,
     DEPRESURIZED = 1,
@@ -48,7 +50,7 @@ function set_lever(pos: Coord, dir: D, on: boolean) {
     return `setblock ${coord(pos)} minecraft:lever[facing=${dir},powered=${on}]`
 }
 
-let pressurized = c.var_int(true, "pressurized")
+let pressurized = c.var_int("pressurized")
 
 function close_door(pos: Coord) {
     return [
@@ -64,16 +66,27 @@ function open_door(pos: Coord) {
     ];
 }
 
+function set_sign(pos: Coord, text: string, color: string) {
+    return `data merge block ${coord(pos)} {Text2:'{\\"text\\":\\"${text}\\"}'}`
+}
+
 let pres_trigger = c.mk_trigger();
 
 let time_scale = 1 / 3;
 
 pres_trigger.at(0)
+    .execute(iff(pressurized.eq(Pressure.PRESSURIZING)), iff(pressurized.eq(Pressure.DEPRESURIZING)))
+        .repeat(set_lever(lv_pres, lv_pres_dir, true))
+    .end()
     .execute(iff(pressurized.eq(Pressure.DEPRESURIZED)))
         .impulse(pressurized.set(Pressure.PRESSURIZING))
+        .impulse(set_sign(status_sign, "Pressurizing", "red"))
+        .impulse(`bossbar set minecraft:airlock_1 name \\"Pressurizing...\\"`)
     .end()
     .execute(iff(pressurized.eq(Pressure.PRESURIZED)))
         .impulse(pressurized.set(Pressure.DEPRESURIZING))
+        .impulse(set_sign(status_sign, "Depressurizing", "red"))
+        .impulse(`bossbar set minecraft:airlock_1 name \\"Depressurizing...\\"`)
     .end()
     .impulse("bossbar set minecraft:airlock_1 color red")
     .impulse("bossbar set minecraft:airlock_1 value 0")
@@ -90,9 +103,11 @@ pres_trigger.at(100 * time_scale)
     .impulse(set_lever(lv_pres, lv_pres_dir, false))
     .execute(iff(pressurized.eq(Pressure.PRESSURIZING)))
         .impulse(pressurized.set(Pressure.PRESURIZED))
+        .impulse(set_sign(status_sign, "Pressurized", "green"))
     .end()
     .execute(iff(pressurized.eq(Pressure.DEPRESURIZING)))
         .impulse(pressurized.set(Pressure.DEPRESURIZED))
+        .impulse(set_sign(status_sign, "Depressurized", "green"))
     .end()
 
 pres_trigger.at(120 * time_scale)
@@ -105,6 +120,7 @@ c
     // Enter from outside, set depressurized
     .execute(iff(pr_on(pr_out)))
         .repeat(pressurized.set(Pressure.DEPRESURIZED))
+        .repeat(set_sign(status_sign, "Depressurized", "green"))
         .repeat_all(open_door(door_out))
         .repeat(set_lever(lv_out, lv_out_dir, false))
     .end()
@@ -112,6 +128,7 @@ c
     // Enter from inside, set pressurized
     .execute(iff(pr_on(pr_in)))
         .repeat(pressurized.set(Pressure.PRESURIZED))
+        .repeat(set_sign(status_sign, "Pressurized", "green"))
         .repeat_all(open_door(door_in))
         .repeat(set_lever(lv_in, lv_in_dir, false))
     .end()
@@ -130,6 +147,22 @@ c
         .repeat_all(open_door(door_out))
     .end()
 
+    .execute(
+        and(iff(lever_on(lv_out)), iff(pressurized.eq(Pressure.PRESURIZED))),
+        and(iff(lever_on(lv_out)), iff(pressurized.eq(Pressure.PRESSURIZING))),
+        and(iff(lever_on(lv_out)), iff(pressurized.eq(Pressure.DEPRESURIZING)))
+    )
+        .repeat(set_lever(lv_out, lv_out_dir, false))
+    .end()
+
+    .execute(
+        and(iff(lever_on(lv_in)), iff(pressurized.eq(Pressure.DEPRESURIZED))),
+        and(iff(lever_on(lv_in)), iff(pressurized.eq(Pressure.PRESSURIZING))),
+        and(iff(lever_on(lv_in)), iff(pressurized.eq(Pressure.DEPRESURIZING)))
+    )
+        .repeat(set_lever(lv_in, lv_in_dir, false))
+    .end()
+
     // if lv_in is on and pressurized
     .execute(and(iff(lever_on(lv_in)), iff(pressurized.eq(Pressure.PRESURIZED))))
         .repeat_all(open_door(door_in))
@@ -143,23 +176,43 @@ c
         .repeat(set_lever(lv_pres, lv_pres_dir, false))
     .end()
 
-    // if all three levers on and depressurized
-    .execute(and(
-        iff(pressurized.eq(Pressure.DEPRESURIZED)),
-        iff(lever_off(lv_out)),
-        iff(lever_off(lv_in)),
-        iff(lever_on(lv_pres)))
+    .execute(
+        and(
+            iff(pressurized.eq(Pressure.DEPRESURIZED)),
+            iff(lever_on(lv_out)),
+            iff(lever_off(lv_in)),
+            iff(lever_on(lv_pres))
+        ),
+        and(
+            iff(pressurized.eq(Pressure.DEPRESURIZED)),
+            iff(lever_off(lv_out)),
+            iff(lever_on(lv_in)),
+            iff(lever_on(lv_pres))
+        ),
+        and(
+            iff(pressurized.eq(Pressure.DEPRESURIZED)),
+            iff(lever_on(lv_out)),
+            iff(lever_on(lv_in)),
+            iff(lever_on(lv_pres))
+        )
     )
-        .repeat(pres_trigger.trigger())
+        .repeat(set_lever(lv_pres, lv_pres_dir, false))
     .end()
 
-    // if all three levers on and depressurized
-    .execute(and(
-        iff(pressurized.eq(Pressure.PRESURIZED)),
-        iff(lever_off(lv_out)),
-        iff(lever_off(lv_in)),
-        iff(lever_on(lv_pres)))
+    .execute(
+        and(
+            iff(pressurized.eq(Pressure.DEPRESURIZED)),
+            iff(lever_off(lv_out)),
+            iff(lever_off(lv_in)),
+            iff(lever_on(lv_pres))
+        ),
+        and(
+            iff(pressurized.eq(Pressure.PRESURIZED)),
+            iff(lever_off(lv_out)),
+            iff(lever_off(lv_in)),
+            iff(lever_on(lv_pres))
+        )
     )
         .repeat(pres_trigger.trigger())
     .end()
-.build([4890,166,4943])
+.build([4930,166,4943])

@@ -124,6 +124,10 @@ export class VarInt {
         return `score ${this.rep} ${this.ns} matches ${val}`;
     }
 
+    matches(val: string): string {
+        return `score ${this.rep} ${this.ns} matches ${val}`;
+    }
+
     set(val: number): string {
         return `scoreboard players set ${this.rep} ${this.ns} ${val}`;
     }
@@ -170,11 +174,11 @@ export class CommandsInner implements AddCmd {
         return new ExecuteBuilder(this, conditions);
     }
 
-    var_bool(init: boolean, id?: string): VarBool {
+    var_bool(id?: string): VarBool {
         return new VarBool(id || crypto.randomUUID(), this.ns);
     }
 
-    var_int(init: boolean, id?: string): VarInt {
+    var_int(id?: string): VarInt {
         return new VarInt(id || crypto.randomUUID(), this.ns);
     }
 
@@ -215,7 +219,6 @@ export class Commands extends CommandsInner {
 
         let trigger_map: Map<string, [Coord, Coord]> = new Map();
 
-        // Trigggers
         let x = 0;
         let start_x = x;
         let start_z = 3;
@@ -227,27 +230,26 @@ export class Commands extends CommandsInner {
                     let t = Math.round(time);
                     let n = 3;
                     while (t > 0) {
-                        out.push(repeater(add(root_pos, [x, 0, n]), D.NORTH, Math.min(t, 4)));
+                        out.push(repeater(add(root_pos, [n, 0, x]), D.WEST, Math.min(t, 4)));
                         t -= Math.min(t, 4);
                         n++;
                     }
                     end_z = Math.max(end_z, n);
-                    out.push(cmd_blk(add(root_pos, [x, 0, n]), repeat, true, command));
-                    x += 2;
+                    out.push(cmd_blk(add(root_pos, [n, 0, x]), repeat, true, command));
+                    x++;
                 }
             }
             let end_x = x;
-            trigger_map.set(id, [add(root_pos, [start_x, 0, 2]), add(root_pos, [end_x, 0, 2])]);
+            trigger_map.set(id, [add(root_pos, [2, 0, start_x]), add(root_pos, [2, 0, end_x])]);
         }
         let end_x = x;
-        out.unshift(`fill ${coord(add(root_pos, [start_x, 0, start_z - 1]))} ${coord(add(root_pos, [end_x, 0, end_z]))} minecraft:air`)
-        out.unshift(`fill ${coord(add(root_pos, [start_x, -1, start_z]))} ${coord(add(root_pos, [end_x, -1, end_z]))} minecraft:gray_wool`)
+        out.unshift(`fill ${coord(add(root_pos, [start_z - 1, 0, start_x]))} ${coord(add(root_pos, [end_z, 0, end_x]))} minecraft:air`)
+        out.unshift(`fill ${coord(add(root_pos, [start_z, -1, start_x]))} ${coord(add(root_pos, [end_z, -1, end_x]))} minecraft:gray_wool`)
 
 
-        // Repeats
         x = 0;
         for (let [repeat, command] of this.commands) {
-            out.push(cmd_blk(add(root_pos, [x, 0, 0]), repeat, false, command));
+            out.push(cmd_blk(add(root_pos, [0, 0, x]), repeat, false, command));
             x++;
         }
 
