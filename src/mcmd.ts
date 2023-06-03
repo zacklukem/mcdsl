@@ -1,5 +1,20 @@
 export type Coord = number[];
 
+export class CallbackRunner<T, K> {
+    private p: T
+    private k: K
+
+    constructor(p: T, k: K) {
+        this.p = p;
+        this.k = k;
+    }
+
+    with(f: (p: T) => void): K {
+        f(this.p)
+        return this.k
+    }
+}
+
 function add(a: Coord, b: Coord): Coord {
     return [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
 }
@@ -59,13 +74,13 @@ export class Trigger {
         this.ea=0;
     }
 
-    at(time: number): CommandsInner {
+    at(time: number): CallbackRunner<CommandsInner, Trigger> {
         if (this.times.has(time)) {
-            return this.times.get(time)!;
+            return new CallbackRunner(this.times.get(time)!, this);
         } else {
             let c = new CommandsInner(this.ns);
             this.times.set(time, c);
-            return c;
+            return new CallbackRunner(c, this);
         }
     }
 
@@ -170,8 +185,8 @@ export class CommandsInner implements AddCmd {
         return this;
     }
 
-    execute(...conditions: string[]): ExecuteBuilder<CommandsInner> {
-        return new ExecuteBuilder(this, conditions);
+    execute(...conditions: string[]): CallbackRunner<ExecuteBuilder<CommandsInner>, CommandsInner> {
+        return new CallbackRunner(new ExecuteBuilder(this, conditions), this);
     }
 
     var_bool(id?: string): VarBool {
@@ -188,6 +203,7 @@ export class CommandsInner implements AddCmd {
 }
 
 
+
 export class Commands extends CommandsInner {
     private triggers: Map<string, Trigger>;
     private trigger_id: number;
@@ -198,8 +214,8 @@ export class Commands extends CommandsInner {
         this.trigger_id = 0;
     }
 
-    override execute(...conditions: string[]): ExecuteBuilder<Commands> {
-        return new ExecuteBuilder(this, conditions);
+    override execute(...conditions: string[]): CallbackRunner<ExecuteBuilder<Commands>, Commands> {
+        return new CallbackRunner(new ExecuteBuilder(this, conditions), this);
     }
 
     build(root_pos: Coord) {
