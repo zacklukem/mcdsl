@@ -1,3 +1,4 @@
+import { Condition, solve } from "./condition";
 import { Coord, Dir } from "./coord";
 export class CallbackRunner<T, K> {
     private p: T;
@@ -14,17 +15,17 @@ export class CallbackRunner<T, K> {
     }
 }
 
-export function iff(pred: string): string {
-    return `if ${pred}`;
-}
+// export function iff(pred: string): string {
+//     return `if ${pred}`;
+// }
 
-export function unless(pred: string): string {
-    return `unless ${pred}`;
-}
+// export function unless(pred: string): string {
+//     return `unless ${pred}`;
+// }
 
-export function and(...conditions: string[]): string {
-    return conditions.join(" ");
-}
+// export function and(...conditions: string[]): string {
+//     return conditions.join(" ");
+// }
 
 export interface AddCmd {
     repeat(cmd: string): AddCmd;
@@ -92,8 +93,8 @@ export class VarBool {
 
     toggle(): string[] {
         return [
-            `execute ${iff(this.false())} run ${this.set_true()}`,
-            `execute ${iff(this.true())} run ${this.set_false()}`,
+            `execute if ${this.false()} run ${this.set_true()}`,
+            `execute if ${this.true()} run ${this.set_false()}`,
         ];
     }
 }
@@ -157,8 +158,8 @@ export class CommandsInner implements AddCmd {
         return this;
     }
 
-    execute(...conditions: string[]): CallbackRunner<ExecuteBuilder<CommandsInner>, CommandsInner> {
-        return new CallbackRunner(new ExecuteBuilder(this, conditions), this);
+    execute(cond: Condition): CallbackRunner<ExecuteBuilder<CommandsInner>, CommandsInner> {
+        return new CallbackRunner(new ExecuteBuilder(this, solve(cond)), this);
     }
 
     var_bool(id?: string): VarBool {
@@ -184,8 +185,8 @@ export class Commands extends CommandsInner {
         this.trigger_id = 0;
     }
 
-    override execute(...conditions: string[]): CallbackRunner<ExecuteBuilder<Commands>, Commands> {
-        return new CallbackRunner(new ExecuteBuilder(this, conditions), this);
+    override execute(cond: Condition): CallbackRunner<ExecuteBuilder<Commands>, Commands> {
+        return new CallbackRunner(new ExecuteBuilder(this, solve(cond)), this);
     }
 
     build(root_pos: Coord) {

@@ -1,7 +1,8 @@
 import { Lever } from "./lever";
-import { Commands, and, iff } from "./mcmd";
+import { Commands } from "./mcmd";
 import { PressurePlate } from "./pressure_plate";
 import { Coord, Dir, cor } from "./coord";
+import { iff, solve } from "./condition";
 
 let c = new Commands("airlock_1");
 
@@ -49,8 +50,9 @@ let time_scale = 1 / 3;
 
 pres_trigger.at(0).with((c) => {
     c.execute(
-        iff(pressurized.eq(Pressure.PRESSURIZING)),
-        iff(pressurized.eq(Pressure.DEPRESURIZING))
+        // prettier-ignore
+        iff(pressurized.eq(Pressure.PRESSURIZING))
+        .or(iff(pressurized.eq(Pressure.DEPRESURIZING)))
     ).with((c) => {
         c.repeat(lv_pres.set_on());
     });
@@ -106,106 +108,89 @@ c.execute(iff(pr_in.is_on())).with((c) => {
 });
 
 // close doors
-c.execute(and(iff(pr_out.is_off()), iff(lv_out.is_off()))).with((c) => {
+c.execute(iff(pr_out.is_off()).and(iff(lv_out.is_off()))).with((c) => {
     c.repeat_all(close_door(door_out));
 });
 
-c.execute(and(iff(pr_in.is_off()), iff(lv_in.is_off()))).with((c) => {
+c.execute(iff(pr_in.is_off()).and(iff(lv_in.is_off()))).with((c) => {
     c.repeat_all(close_door(door_in));
 });
 
 // if lv_out is on and not pressurized
-c.execute(and(iff(lv_out.is_on()), iff(pressurized.eq(Pressure.DEPRESURIZED)))).with((c) => {
+c.execute(iff(lv_out.is_on()).and(iff(pressurized.eq(Pressure.DEPRESURIZED)))).with((c) => {
     c.repeat_all(open_door(door_out));
 });
 
 c.execute(
-    and(iff(lv_out.is_on()), iff(pressurized.eq(Pressure.PRESURIZED))),
-    and(iff(lv_out.is_on()), iff(pressurized.eq(Pressure.PRESSURIZING))),
-    and(iff(lv_out.is_on()), iff(pressurized.eq(Pressure.DEPRESURIZING)))
+    // prettier-ignore
+    iff(lv_out.is_on()).and(
+        iff(pressurized.eq(Pressure.PRESURIZED))
+        .or(iff(pressurized.eq(Pressure.PRESSURIZING)))
+        .or(iff(pressurized.eq(Pressure.DEPRESURIZING)))
+    )
 ).with((c) => {
     c.repeat(lv_out.set_off());
 });
 
 c.execute(
-    and(iff(lv_in.is_on()), iff(pressurized.eq(Pressure.DEPRESURIZED))),
-    and(iff(lv_in.is_on()), iff(pressurized.eq(Pressure.PRESSURIZING))),
-    and(iff(lv_in.is_on()), iff(pressurized.eq(Pressure.DEPRESURIZING)))
+    // prettier-ignore
+    iff(lv_in.is_on()).and(
+        iff(pressurized.eq(Pressure.DEPRESURIZED))
+        .or(iff(pressurized.eq(Pressure.PRESSURIZING)))
+        .or(iff(pressurized.eq(Pressure.DEPRESURIZING)))
+    )
 ).with((c) => {
     c.repeat(lv_in.set_off());
 });
 
 // if lv_in is on and pressurized
-c.execute(and(iff(lv_in.is_on()), iff(pressurized.eq(Pressure.PRESURIZED)))).with((c) => {
+c.execute(iff(lv_in.is_on()).and(iff(pressurized.eq(Pressure.PRESURIZED)))).with((c) => {
     c.repeat_all(open_door(door_in));
 });
 
-c.execute(and(iff(lv_out.is_on()), iff(lv_pres.is_on()))).with((c) => {
+c.execute(iff(lv_out.is_on()).and(iff(lv_pres.is_on()))).with((c) => {
     c.repeat(lv_pres.set_off());
 });
 
-c.execute(and(iff(lv_in.is_on()), iff(lv_pres.is_on()))).with((c) => {
+c.execute(iff(lv_in.is_on()).and(iff(lv_pres.is_on()))).with((c) => {
     c.repeat(lv_pres.set_off());
 });
 
 c.execute(
-    and(
-        iff(pressurized.eq(Pressure.DEPRESURIZED)),
-        iff(lv_out.is_on()),
-        iff(lv_in.is_off()),
-        iff(lv_pres.is_on())
-    ),
-    and(
-        iff(pressurized.eq(Pressure.DEPRESURIZED)),
-        iff(lv_out.is_off()),
-        iff(lv_in.is_on()),
-        iff(lv_pres.is_on())
-    ),
-    and(
-        iff(pressurized.eq(Pressure.DEPRESURIZED)),
-        iff(lv_out.is_on()),
-        iff(lv_in.is_on()),
-        iff(lv_pres.is_on())
-    )
+    // prettier-ignore
+    iff(lv_pres.is_on())
+    .and(iff(lv_out.is_on()).or(iff(lv_in.is_on())))
+    .and(iff(pressurized.eq(Pressure.PRESURIZED)))
 ).with((c) => {
     c.repeat(lv_pres.set_off());
 });
 
 c.execute(
-    and(
-        iff(pressurized.eq(Pressure.DEPRESURIZED)),
-        iff(lv_out.is_off()),
-        iff(lv_in.is_off()),
-        iff(lv_pres.is_on())
-    ),
-    and(
-        iff(pressurized.eq(Pressure.PRESURIZED)),
-        iff(lv_out.is_off()),
-        iff(lv_in.is_off()),
-        iff(lv_pres.is_on())
-    )
+    // prettier-ignore
+    iff(lv_pres.is_on())
+    .and(iff(lv_out.is_off()))
+    .and(iff(lv_in.is_off()))
+    .and(iff(pressurized.eq(Pressure.PRESURIZED)).or(iff(pressurized.eq(Pressure.DEPRESURIZED))))
 ).with((c) => {
     c.repeat(pres_trigger.trigger());
 });
 
 c.execute(
-    and(
-        iff(pressurized.eq(Pressure.DEPRESURIZED)),
-        iff(lv_out.is_off()),
-        iff(lv_in.is_off()),
-        iff(lv_pres.is_on())
-    )
+    // prettier-ignore
+    iff(pressurized.eq(Pressure.DEPRESURIZED))
+    .and(iff(lv_out.is_off()))
+    .and(iff(lv_in.is_off()))
+    .and(iff(lv_pres.is_on()))
 ).with((c) => {
     c.repeat(`bossbar set minecraft:airlock_1 name \\"Pressurizing...\\"`);
 });
 
 c.execute(
-    and(
-        iff(pressurized.eq(Pressure.PRESURIZED)),
-        iff(lv_out.is_off()),
-        iff(lv_in.is_off()),
-        iff(lv_pres.is_on())
-    )
+    // prettier-ignore
+    iff(pressurized.eq(Pressure.PRESURIZED))
+    .and(iff(lv_out.is_off()))
+    .and(iff(lv_in.is_off()))
+    .and(iff(lv_pres.is_on()))
 ).with((c) => {
     c.repeat(`bossbar set minecraft:airlock_1 name \\"Depressurizing...\\"`);
 });
