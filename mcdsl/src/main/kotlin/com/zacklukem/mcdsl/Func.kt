@@ -1,4 +1,4 @@
-package mcdsl
+package com.zacklukem.mcdsl
 
 data class Func(val commands: List<String>, val name: String, val namespace: String)
 

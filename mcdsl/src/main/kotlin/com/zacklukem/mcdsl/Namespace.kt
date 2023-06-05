@@ -1,4 +1,4 @@
-package mcdsl
+package com.zacklukem.mcdsl
 
 import java.io.File
 import java.nio.file.Path

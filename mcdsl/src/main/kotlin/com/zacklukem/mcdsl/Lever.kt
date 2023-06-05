@@ -1,4 +1,4 @@
-package mcdsl
+package com.zacklukem.mcdsl
 
 class Lever(private val pos: Coord, private val dir: Dir) {
     fun isOn(): Condition {

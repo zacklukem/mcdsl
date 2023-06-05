@@ -1,4 +1,4 @@
-package mcdsl
+package com.zacklukem.mcdsl
 
 class VarInt(val namespace: String, val name: String) {
     fun set(value: Int): String {

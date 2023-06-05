@@ -1,4 +1,4 @@
-package mcdsl
+package com.zacklukem.mcdsl
 
 
 open class CommandBuilder {

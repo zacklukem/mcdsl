@@ -1,5 +1,4 @@
-import mcdsl.*
-import java.io.File
+import com.zacklukem.mcdsl.*
 import kotlin.io.path.Path
 
 enum class Pressure(val value: Int) : Discriminant {

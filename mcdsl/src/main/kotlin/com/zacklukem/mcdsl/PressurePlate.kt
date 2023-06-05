@@ -1,4 +1,4 @@
-package mcdsl
+package com.zacklukem.mcdsl
 
 class PressurePlate(private val pos: Coord) {
     fun isOn(): Condition {
