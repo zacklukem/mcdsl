@@ -1,5 +1,6 @@
 package com.zacklukem.mcdsl
 
+import com.zacklukem.mcdsl.commands.Bossbar
 import com.zacklukem.mcdsl.util.*
 import java.io.File
 import java.nio.file.Path
@@ -48,6 +49,10 @@ class Namespace(val namespace: String, private val coords: Coord? = null) {
         return VarInt(namespace, name)
     }
 
+    fun bossbar(name: String = UUID.randomUUID().toString()): Bossbar {
+        return Bossbar(namespace, name)
+    }
+
     fun <T : Discriminant> varEnum(name: String = UUID.randomUUID().toString()): VarEnum<T> {
         return VarEnum<T>(namespace, name)
     }
@@ -65,11 +70,11 @@ class Namespace(val namespace: String, private val coords: Coord? = null) {
             cmd: String
         ): String {
             return if (repeat == CommandBlockKind.REPEAT) {
-                "setblock $pos minecraft:repeating_command_block{Command:\"$cmd\",auto:${
+                "setblock $pos minecraft:repeating_command_block{Command:\"${escapeString(cmd)}\",auto:${
                     if (needsRedstone) 0 else 1
                 }}"
             } else {
-                "setblock $pos minecraft:command_block{Command:\"$cmd\",auto:${
+                "setblock $pos minecraft:command_block{Command:\"$${escapeString(cmd)}\",auto:${
                     if (needsRedstone) 0 else 1
                 }}"
             }
@@ -156,6 +161,18 @@ class Namespace(val namespace: String, private val coords: Coord? = null) {
             f.writeText(s)
         }
 
+    }
+
+    private fun escapeString(str: String): String {
+        var out = ""
+        for (c in str) {
+            if (c == '"') {
+                out += "\\\""
+            } else {
+                out += c
+            }
+        }
+        return out
     }
 
     private fun replaceTriggers(triggerMap: Map<String, Pair<Coord, Coord>>?, str: String): String {

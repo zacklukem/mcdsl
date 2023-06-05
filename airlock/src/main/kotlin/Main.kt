@@ -1,5 +1,6 @@
 import com.zacklukem.mcdsl.*
 import com.zacklukem.mcdsl.blocks.*
+import com.zacklukem.mcdsl.commands.Color
 import com.zacklukem.mcdsl.util.*
 import kotlin.io.path.Path
 
@@ -15,15 +16,15 @@ enum class Pressure(private val value: Int) : Discriminant {
 class Door(private val pos: Coord) {
     fun open(): List<String> {
         return listOf(
-            "setblock $pos minecraft:air",
-            "setblock ${pos + Coord(0, 1, 0)} minecraft:air"
+            pos.setblock("minecraft:air"),
+            (pos + Coord.UP).setblock("minecraft:air"),
         )
     }
 
     fun close(): List<String> {
         return listOf(
-            "setblock $pos minecraft:polished_blackstone_bricks",
-            "setblock ${pos + Coord(0, 1, 0)} minecraft:black_stained_glass"
+            pos.setblock("minecraft:polished_blackstone_bricks"),
+            (pos + Coord.UP).setblock("minecraft:black_stained_glass"),
         )
     }
 }
@@ -44,6 +45,7 @@ fun airlock(pack: Datapack) {
     val doorIn = Door(Coord(5041, 227, 4960))
 
     val pressure = airlock.varEnum<Pressure>("pressure")
+    val airlockBar = airlock.bossbar("airlock_1")
 
     val presTrigger = airlock.trigger {
         val timeScale = 1.0f / 3.0f
@@ -61,18 +63,18 @@ fun airlock(pack: Datapack) {
                 impulse(pressure.set(Pressure.DEPRESSURIZING))
             }
 
-            impulse("bossbar set minecraft:airlock_1 color red")
-            impulse("bossbar set minecraft:airlock_1 visible true")
+            impulse(airlockBar.setColor(Color.RED))
+            impulse(airlockBar.setVisible())
         }
 
         for (i in 0..100 step 10) {
             atTime(i.toFloat() * timeScale) {
-                impulse("bossbar set minecraft:airlock_1 value $i")
+                impulse(airlockBar.setValue(i))
             }
         }
 
         atTime(100.0f * timeScale) {
-            impulse("bossbar set minecraft:airlock_1 color green")
+            impulse(airlockBar.setColor(Color.GREEN))
             impulse(lvPres.setOff())
             if_(pressure.eq(Pressure.PRESSURIZING)) {
                 impulse(pressure.set(Pressure.PRESSURIZED))
@@ -84,9 +86,9 @@ fun airlock(pack: Datapack) {
         }
 
         atTime(120.0f * timeScale) {
-            impulse("bossbar set minecraft:airlock_1 visible false")
-            impulse("bossbar set minecraft:airlock_1 value 0")
-            impulse("bossbar set minecraft:airlock_1 color red")
+            impulse(airlockBar.setInvisible())
+            impulse(airlockBar.setValue(0))
+            impulse(airlockBar.setColor(Color.RED))
             repeat(reset())
         }
     }
@@ -146,11 +148,11 @@ fun airlock(pack: Datapack) {
             }
 
             if_(pressure.eq(Pressure.DEPRESSURIZED) * lvOut.isOff() * lvIn.isOff()) {
-                repeat("bossbar set minecraft:airlock_1 name \\\"Pressurizing...\\\"")
+                repeat(airlockBar.setName("Pressurizing..."))
             }
 
             if_(pressure.eq(Pressure.PRESSURIZED) * lvOut.isOff() * lvIn.isOff()) {
-                repeat("bossbar set minecraft:airlock_1 name \\\"Depressurizing...\\\"")
+                repeat(airlockBar.setName("Depressurizing..."))
             }
         }
     }
