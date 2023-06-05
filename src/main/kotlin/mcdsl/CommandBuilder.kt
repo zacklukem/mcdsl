@@ -10,7 +10,7 @@ open class CommandBuilder {
         val solved = cond.solve()
         for (s in solved) {
             for (cmd in builder.commands) {
-                commands.add("$s ${cmd}")
+                commands.add("execute $s run $cmd")
             }
         }
     }

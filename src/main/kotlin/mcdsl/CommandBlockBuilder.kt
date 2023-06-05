@@ -14,7 +14,7 @@ open class CommandBlockBuilder {
         val solved = cond.solve()
         for (s in solved) {
             for (cmd in builder.commands) {
-                commands.add(Pair(cmd.first, "$s ${cmd.second}"))
+                commands.add(Pair(cmd.first, "execute $s run ${cmd.second}"))
             }
         }
     }
@@ -33,13 +33,13 @@ open class CommandBlockBuilder {
         commands.add(Pair(CommandBlockKind.REPEAT, cmd))
     }
 
-    open fun repeat(pack: Pack, cmd: CommandBuilder.() -> Unit) {
+    open fun repeat(pack: Namespace, cmd: CommandBuilder.() -> Unit) {
         repeat(pack.function(cmd).call())
     }
 
     fun repeat(cmds: List<String>) {
         cmds.forEach {
-            this.impulse(it)
+            this.repeat(it)
         }
     }
 }

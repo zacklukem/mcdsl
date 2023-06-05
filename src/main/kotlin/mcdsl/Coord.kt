@@ -1,5 +1,7 @@
 package mcdsl
 
+import kotlin.math.roundToInt
+
 enum class Dir(val repr: String) {
     NORTH("north"),
     SOUTH("south"),
@@ -26,6 +28,7 @@ class Coord(val x: Float, val y: Float, val z: Float) {
     operator fun div(other: Float): Coord =
         Coord(x / other, y / other, z / other)
 
-    override fun toString(): String =
-        "$x $y $z"
+    override fun toString(): String {
+        return "${x.roundToInt()} ${y.roundToInt()} ${z.roundToInt()}"
+    }
 }

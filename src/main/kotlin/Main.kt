@@ -14,16 +14,22 @@ enum class Pressure(val value: Int) : Discriminant {
 
 class Door(val pos: Coord) {
     fun open(): List<String> {
-        return listOf("setblock $pos minecraft:air")
+        return listOf(
+            "setblock $pos minecraft:air",
+            "setblock ${pos + Coord(0, 1, 0)} minecraft:air"
+        )
     }
 
     fun close(): List<String> {
-        return listOf("setblock $pos minecraft:polished_blackstone_bricks")
+        return listOf(
+            "setblock $pos minecraft:polished_blackstone_bricks",
+            "setblock ${pos + Coord(0, 1, 0)} minecraft:black_stained_glass"
+        )
     }
 }
 
 fun main() {
-    val pack = Pack("airlock_1")
+    val pack = Namespace("airlock_1")
 
     val prOut = PressurePlate(Coord(5045, 227, 4960))
     val prIn = PressurePlate(Coord(5040, 227, 4960))
@@ -137,9 +143,9 @@ fun main() {
         }
 
         // Unnecessary?
-//        executeIf(lvPres.isOn() * (lvIn.isOn() + lvOut.isOn()) * pressure.eq(Pressure.PRESURIZED)) {
-//            repeat(lvPres.setOff())
-//        }
+        executeIf(lvPres.isOn() * (lvIn.isOn() + lvOut.isOn()) * pressure.eq(Pressure.PRESSURIZED)) {
+            repeat(lvPres.setOff())
+        }
 
         executeIf(
             lvPres.isOn() * lvOut.isOff() * lvIn.isOff() * pressure.oneOf(Pressure.PRESSURIZED, Pressure.DEPRESSURIZED)

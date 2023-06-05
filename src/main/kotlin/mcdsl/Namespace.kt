@@ -5,7 +5,7 @@ import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
-class Pack(private val namespace: String) {
+class Namespace(private val namespace: String) {
     private val commandBlocks = mutableListOf<Pair<CommandBlockKind, String>>()
     private val functions = mutableListOf<Func>()
     private val triggers = mutableMapOf<String, Trigger>()
