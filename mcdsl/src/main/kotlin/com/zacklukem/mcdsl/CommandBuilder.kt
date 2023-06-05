@@ -1,22 +1,9 @@
 package com.zacklukem.mcdsl
 
 
-open class CommandBuilder {
-    val commands: MutableList<String> = mutableListOf()
-
-    fun executeIf(cond: Condition, c: CommandBuilder.() -> Unit) {
-        val builder = CommandBuilder()
-        c(builder)
-        val solved = cond.solve()
-        for (s in solved) {
-            for (cmd in builder.commands) {
-                commands.add("execute $s run $cmd")
-            }
-        }
-    }
-
+open class CommandBuilder : BasicCommandBuilder<Unit, CommandBuilder>() {
     open fun cmd(cmd: String) {
-        commands.add(cmd)
+        addCommand(Unit, cmd)
     }
 
     fun cmd(cmds: List<String>) {
@@ -25,4 +12,5 @@ open class CommandBuilder {
         }
     }
 
+    override fun makeSelf(): CommandBuilder = CommandBuilder()
 }

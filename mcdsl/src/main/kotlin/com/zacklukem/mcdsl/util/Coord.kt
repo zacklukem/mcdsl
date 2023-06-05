@@ -1,4 +1,4 @@
-package com.zacklukem.mcdsl
+package com.zacklukem.mcdsl.util
 
 import kotlin.math.roundToInt
 

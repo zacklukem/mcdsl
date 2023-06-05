@@ -1,18 +1,18 @@
 import com.zacklukem.mcdsl.*
+import com.zacklukem.mcdsl.blocks.*
+import com.zacklukem.mcdsl.util.*
 import kotlin.io.path.Path
 
-enum class Pressure(val value: Int) : Discriminant {
+enum class Pressure(private val value: Int) : Discriminant {
     PRESSURIZED(0),
     DEPRESSURIZED(1),
     PRESSURIZING(2),
     DEPRESSURIZING(3);
 
-    override fun discriminant(): Int {
-        return value
-    }
+    override fun discriminant(): Int = value
 }
 
-class Door(val pos: Coord) {
+class Door(private val pos: Coord) {
     fun open(): List<String> {
         return listOf(
             "setblock $pos minecraft:air",
@@ -28,8 +28,8 @@ class Door(val pos: Coord) {
     }
 }
 
-fun main(args: Array<String>) {
-    val pack = Namespace("airlock_1")
+fun airlock(pack: Datapack) {
+    val airlock = pack.namespace("airlock_1", Coord(4930, 166, 4943))
 
     val prOut = PressurePlate(Coord(5045, 227, 4960))
     val prIn = PressurePlate(Coord(5040, 227, 4960))
@@ -43,21 +43,21 @@ fun main(args: Array<String>) {
     val doorOut = Door(Coord(5044, 227, 4960))
     val doorIn = Door(Coord(5041, 227, 4960))
 
-    val pressure = pack.varEnum<Pressure>("pressure")
+    val pressure = airlock.varEnum<Pressure>("pressure")
 
-    val presTrigger = pack.trigger {
+    val presTrigger = airlock.trigger {
         val timeScale = 1.0f / 3.0f
 
-        at(0) {
-            executeIf(pressure.oneOf(Pressure.PRESSURIZING, Pressure.DEPRESSURIZING)) {
+        atTime(0) {
+            if_(pressure.oneOf(Pressure.PRESSURIZING, Pressure.DEPRESSURIZING)) {
                 repeat(lvPres.setOn())
             }
 
-            executeIf(pressure.eq(Pressure.DEPRESSURIZED)) {
+            if_(pressure.eq(Pressure.DEPRESSURIZED)) {
                 impulse(pressure.set(Pressure.PRESSURIZING))
             }
 
-            executeIf(pressure.eq(Pressure.PRESSURIZED)) {
+            if_(pressure.eq(Pressure.PRESSURIZED)) {
                 impulse(pressure.set(Pressure.DEPRESSURIZING))
             }
 
@@ -66,24 +66,24 @@ fun main(args: Array<String>) {
         }
 
         for (i in 0..100 step 10) {
-            at(i.toFloat() * timeScale) {
+            atTime(i.toFloat() * timeScale) {
                 impulse("bossbar set minecraft:airlock_1 value $i")
             }
         }
 
-        at(100.0f * timeScale) {
+        atTime(100.0f * timeScale) {
             impulse("bossbar set minecraft:airlock_1 color green")
             impulse(lvPres.setOff())
-            executeIf(pressure.eq(Pressure.PRESSURIZING)) {
+            if_(pressure.eq(Pressure.PRESSURIZING)) {
                 impulse(pressure.set(Pressure.PRESSURIZED))
             }
 
-            executeIf(pressure.eq(Pressure.DEPRESSURIZING)) {
+            if_(pressure.eq(Pressure.DEPRESSURIZING)) {
                 impulse(pressure.set(Pressure.DEPRESSURIZED))
             }
         }
 
-        at(120.0f * timeScale) {
+        atTime(120.0f * timeScale) {
             impulse("bossbar set minecraft:airlock_1 visible false")
             impulse("bossbar set minecraft:airlock_1 value 0")
             impulse("bossbar set minecraft:airlock_1 color red")
@@ -91,82 +91,79 @@ fun main(args: Array<String>) {
         }
     }
 
-    pack.commands {
-        executeIf(prOut.isOn()) {
-            repeat(pack) {
+    airlock.commands {
+        if_(prOut.isOn()) {
+            repeat(airlock) {
                 cmd(pressure.set(Pressure.DEPRESSURIZED))
                 cmd(doorOut.open())
                 cmd(lvOut.setOff())
             }
         }
 
-        executeIf(prIn.isOn()) {
-            repeat(pack) {
+        if_(prIn.isOn()) {
+            repeat(airlock) {
                 cmd(pressure.set(Pressure.PRESSURIZED))
                 cmd(doorIn.open())
                 cmd(lvIn.setOff())
             }
         }
 
-        executeIf(prOut.isOff() * lvOut.isOff()) {
+        if_(prOut.isOff() * lvOut.isOff()) {
             repeat(doorOut.close())
         }
 
-        executeIf(prIn.isOff() * lvIn.isOff()) {
+        if_(prIn.isOff() * lvIn.isOff()) {
             repeat(doorIn.close())
         }
 
-        executeIf(lvOut.isOn() * pressure.eq(Pressure.DEPRESSURIZED)) {
-            repeat(doorOut.open())
+        if_(lvOut.isOn()) {
+            if_(pressure.eq(Pressure.DEPRESSURIZED)) {
+                repeat(doorOut.open())
+            }.else_ {
+                repeat(lvOut.setOff())
+            }
         }
 
-        executeIf(lvIn.isOn() * pressure.eq(Pressure.PRESSURIZED)) {
-            repeat(doorIn.open())
+        if_(lvIn.isOn()) {
+            if_(pressure.eq(Pressure.PRESSURIZED)) {
+                repeat(doorIn.open())
+            }.else_ {
+                repeat(lvIn.setOff())
+            }
         }
 
-        executeIf(lvOut.isOn() * pressure.oneOf(Pressure.PRESSURIZED, Pressure.PRESSURIZING, Pressure.DEPRESSURIZING)) {
-            repeat(lvOut.setOff())
+        if_(lvPres.isOn()) {
+            if_(lvIn.isOn() + lvOut.isOn()) {
+                repeat(lvPres.setOff())
+            }
+
+            if_((lvIn.isOn() + lvOut.isOn()) * pressure.eq(Pressure.PRESSURIZED)) {
+                repeat(lvPres.setOff())
+            }
+
+            if_(lvOut.isOff() * lvIn.isOff() * pressure.oneOf(Pressure.PRESSURIZED, Pressure.DEPRESSURIZED)) {
+                repeat(presTrigger.trigger())
+            }
+
+            if_(pressure.eq(Pressure.DEPRESSURIZED) * lvOut.isOff() * lvIn.isOff()) {
+                repeat("bossbar set minecraft:airlock_1 name \\\"Pressurizing...\\\"")
+            }
+
+            if_(pressure.eq(Pressure.PRESSURIZED) * lvOut.isOff() * lvIn.isOff()) {
+                repeat("bossbar set minecraft:airlock_1 name \\\"Depressurizing...\\\"")
+            }
         }
+    }
+}
 
-        executeIf(
-            lvIn.isOn() * pressure.oneOf(
-                Pressure.DEPRESSURIZED,
-                Pressure.PRESSURIZING,
-                Pressure.DEPRESSURIZING
-            )
-        ) {
-            repeat(lvIn.setOff())
-        }
-
-        executeIf(lvPres.isOn() * (lvIn.isOn() + lvOut.isOn())) {
-            repeat(lvPres.setOff())
-        }
-
-        // Unnecessary?
-        executeIf(lvPres.isOn() * (lvIn.isOn() + lvOut.isOn()) * pressure.eq(Pressure.PRESSURIZED)) {
-            repeat(lvPres.setOff())
-        }
-
-        executeIf(
-            lvPres.isOn() * lvOut.isOff() * lvIn.isOff() * pressure.oneOf(Pressure.PRESSURIZED, Pressure.DEPRESSURIZED)
-        ) {
-            repeat(presTrigger.trigger())
-        }
-
-        executeIf(
-            pressure.eq(Pressure.DEPRESSURIZED) * lvOut.isOff() * lvIn.isOff() * lvPres.isOn()
-        ) {
-            repeat("bossbar set minecraft:airlock_1 name \\\"Pressurizing...\\\"")
-        }
-
-        executeIf(
-            pressure.eq(Pressure.PRESSURIZED) * lvOut.isOff() * lvIn.isOff() * lvPres.isOn()
-        ) {
-            repeat("bossbar set minecraft:airlock_1 name \\\"Depressurizing...\\\"")
-        }
-
-
+fun main(args: Array<String>) {
+    val pack = datapack {
+        name = "mc_map"
+        description = "A datapack for the mc_map world"
+        packFormat = 12
     }
 
-    pack.print(Coord(4930, 166, 4943), Path(args[0]), Path(args[1]))
+    airlock(pack)
+
+    pack.print(Path(args[0]))
 }

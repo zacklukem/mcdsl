@@ -1,4 +1,4 @@
-package com.zacklukem.mcdsl
+package com.zacklukem.mcdsl.util
 
 interface Condition {
     operator fun not(): Condition

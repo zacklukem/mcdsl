@@ -6,11 +6,11 @@ class Trigger(private val id: String) {
     val times: MutableMap<Int, MutableList<Pair<CommandBlockKind, String>>> = mutableMapOf()
 
 
-    fun at(time: Float, c: CommandBlockBuilder.() -> Unit) {
-        at(time.roundToInt(), c)
+    fun atTime(time: Float, c: CommandBlockBuilder.() -> Unit) {
+        atTime(time.roundToInt(), c)
     }
 
-    fun at(time: Int, c: CommandBlockBuilder.() -> Unit) {
+    fun atTime(time: Int, c: CommandBlockBuilder.() -> Unit) {
         val builder = CommandBlockBuilder()
         c(builder)
         if (times.containsKey(time)) {

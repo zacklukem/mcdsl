@@ -5,22 +5,9 @@ enum class CommandBlockKind {
     REPEAT
 }
 
-open class CommandBlockBuilder {
-    val commands: MutableList<Pair<CommandBlockKind, String>> = mutableListOf()
-
-    fun executeIf(cond: Condition, c: CommandBlockBuilder.() -> Unit) {
-        val builder = CommandBlockBuilder()
-        c(builder)
-        val solved = cond.solve()
-        for (s in solved) {
-            for (cmd in builder.commands) {
-                commands.add(Pair(cmd.first, "execute $s run ${cmd.second}"))
-            }
-        }
-    }
-
+open class CommandBlockBuilder : BasicCommandBuilder<CommandBlockKind, CommandBlockBuilder>() {
     open fun impulse(cmd: String) {
-        commands.add(Pair(CommandBlockKind.IMPULSE, cmd))
+        addCommand(CommandBlockKind.IMPULSE, cmd)
     }
 
     fun impulse(cmds: List<String>) {
@@ -42,4 +29,6 @@ open class CommandBlockBuilder {
             this.repeat(it)
         }
     }
+
+    override fun makeSelf(): CommandBlockBuilder = CommandBlockBuilder()
 }
