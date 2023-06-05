@@ -1,6 +1,7 @@
 package mcdsl
 
 import java.io.File
+import java.nio.file.Path
 import java.util.*
 import kotlin.math.max
 import kotlin.math.min
@@ -44,7 +45,7 @@ class Namespace(private val namespace: String) {
         return trigger
     }
 
-    fun print(rootPos: Coord, outFile: File) {
+    fun print(rootPos: Coord, outFile: Path, dataPack: Path) {
         fun repeater(pos: Coord, dir: Dir, delay: Int): String {
             return "setblock $pos minecraft:repeater[facing=$dir,delay=$delay]"
         }
@@ -129,15 +130,17 @@ class Namespace(private val namespace: String) {
             out[i] = replaceTriggers(triggerMap, out[i])
         }
 
-        File("./datapack/data/$namespace").deleteRecursively()
+        File("$dataPack/data/$namespace").deleteRecursively()
 
-        File("./datapack/data/$namespace/functions").mkdirs()
+        File("$dataPack/data/$namespace/functions").mkdirs()
 
         for (func in functions) {
-            val f = File("./datapack/data/$namespace/functions/${func.name}.mcfunction")
+            val f = File("$dataPack/data/$namespace/functions/${func.name}.mcfunction")
             val s = "# GENERATED\n\n" + func.commands.joinToString("\n") { replaceTriggers(triggerMap, it) }
             f.writeText(s)
         }
+
+        val outFile = File(outFile.toString())
 
         outFile.writeText(out.joinToString("\n"))
     }

@@ -1,5 +1,6 @@
 import mcdsl.*
 import java.io.File
+import kotlin.io.path.Path
 
 enum class Pressure(val value: Int) : Discriminant {
     PRESSURIZED(0),
@@ -28,7 +29,7 @@ class Door(val pos: Coord) {
     }
 }
 
-fun main() {
+fun main(args: Array<String>) {
     val pack = Namespace("airlock_1")
 
     val prOut = PressurePlate(Coord(5045, 227, 4960))
@@ -168,5 +169,5 @@ fun main() {
 
     }
 
-    pack.print(Coord(4930, 166, 4943), File("out.txt"))
+    pack.print(Coord(4930, 166, 4943), Path(args[0]), Path(args[1]))
 }

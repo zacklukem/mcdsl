@@ -12,6 +12,4 @@ out/
 
 .DS_Store
 
-out.txt
-
-datapack/data/airlock_1
+outputs/
