@@ -30,7 +30,7 @@ class Door(private val pos: Coord) {
 }
 
 fun airlock(pack: Datapack) {
-    val airlock = pack.namespace("airlock_1", Coord(4930, 166, 4943))
+    val airlock = pack.namespace("airlock_1")
 
     val prOut = PressurePlate(Coord(5045, 227, 4960))
     val prIn = PressurePlate(Coord(5040, 227, 4960))
@@ -44,115 +44,123 @@ fun airlock(pack: Datapack) {
     val doorOut = Door(Coord(5044, 227, 4960))
     val doorIn = Door(Coord(5041, 227, 4960))
 
+    val pressureSign = Sign(Coord(5042, 228, 4961))
     val pressure = airlock.varEnum<Pressure>("pressure")
     val airlockBar = airlock.bossbar("airlock_1")
 
-    val presTrigger = airlock.trigger {
+    airlock.onLoad {
+        cmd(airlockBar.add("Pressure"))
+        cmd(pressure.init())
+    }
+
+    val presTrigger = airlock.function("pres_trigger") {
         val timeScale = 1.0f / 3.0f
 
-        atTime(0) {
-            if_(pressure.oneOf(Pressure.PRESSURIZING, Pressure.DEPRESSURIZING)) {
-                repeat(lvPres.setOn())
-            }
-
-            if_(pressure.eq(Pressure.DEPRESSURIZED)) {
-                impulse(pressure.set(Pressure.PRESSURIZING))
-            }
-
-            if_(pressure.eq(Pressure.PRESSURIZED)) {
-                impulse(pressure.set(Pressure.DEPRESSURIZING))
-            }
-
-            impulse(airlockBar.setColor(Color.RED))
-            impulse(airlockBar.setVisible())
+        if_(pressure.eq(Pressure.DEPRESSURIZED)) {
+            cmd(pressure.set(Pressure.PRESSURIZING))
         }
 
-        for (i in 0..100 step 10) {
-            atTime(i.toFloat() * timeScale) {
-                impulse(airlockBar.setValue(i))
+        if_(pressure.eq(Pressure.PRESSURIZED)) {
+            cmd(pressure.set(Pressure.DEPRESSURIZING))
+        }
+
+        cmd(airlockBar.setPlayers("@a"))
+        cmd(airlockBar.setColor(Color.RED))
+        cmd(airlockBar.setVisible())
+
+        for (i in 0..100 step 5) {
+            schedule_(ticks(i.toFloat() * timeScale)) {
+                cmd(airlockBar.setValue(i))
             }
         }
 
-        atTime(100.0f * timeScale) {
-            impulse(airlockBar.setColor(Color.GREEN))
-            impulse(lvPres.setOff())
+        schedule_(ticks(100.0f * timeScale)) {
+            cmd(airlockBar.setColor(Color.GREEN))
+            cmd(lvPres.setOff())
             if_(pressure.eq(Pressure.PRESSURIZING)) {
-                impulse(pressure.set(Pressure.PRESSURIZED))
+                cmd(pressureSign.setText("\nPRESSURIZED"))
+                cmd(airlockBar.setName("Pressurized"))
+                cmd(pressure.set(Pressure.PRESSURIZED))
             }
 
             if_(pressure.eq(Pressure.DEPRESSURIZING)) {
-                impulse(pressure.set(Pressure.DEPRESSURIZED))
+                cmd(pressureSign.setText("\nDEPRESSURIZED"))
+                cmd(airlockBar.setName("Depressurized"))
+                cmd(pressure.set(Pressure.DEPRESSURIZED))
             }
         }
 
-        atTime(120.0f * timeScale) {
-            impulse(airlockBar.setInvisible())
-            impulse(airlockBar.setValue(0))
-            impulse(airlockBar.setColor(Color.RED))
-            repeat(reset())
+        schedule_(ticks(200.0f * timeScale)) {
+            cmd(airlockBar.setInvisible())
+            cmd(airlockBar.setValue(0))
+            cmd(airlockBar.setColor(Color.RED))
         }
     }
 
-    airlock.commands {
+    airlock.onTick {
+        if_(pressure.oneOf(Pressure.PRESSURIZING, Pressure.DEPRESSURIZING)) {
+            cmd(lvPres.setOn())
+        }
+
         if_(prOut.isOn()) {
-            repeat(airlock) {
-                cmd(pressure.set(Pressure.DEPRESSURIZED))
-                cmd(doorOut.open())
-                cmd(lvOut.setOff())
-            }
+            cmd(pressure.set(Pressure.DEPRESSURIZED))
+            cmd(pressureSign.setText("\nDEPRESSURIZED"))
+            cmd(doorOut.open())
+            cmd(lvOut.setOff())
         }
 
         if_(prIn.isOn()) {
-            repeat(airlock) {
-                cmd(pressure.set(Pressure.PRESSURIZED))
-                cmd(doorIn.open())
-                cmd(lvIn.setOff())
-            }
+            cmd(pressure.set(Pressure.PRESSURIZED))
+            cmd(pressureSign.setText("\nPRESSURIZED"))
+            cmd(doorIn.open())
+            cmd(lvIn.setOff())
         }
 
-        if_(prOut.isOff() * lvOut.isOff()) {
-            repeat(doorOut.close())
+        if_(prOut.isOff() and lvOut.isOff()) {
+            cmd(doorOut.close())
         }
 
-        if_(prIn.isOff() * lvIn.isOff()) {
-            repeat(doorIn.close())
+        if_(prIn.isOff() and lvIn.isOff()) {
+            cmd(doorIn.close())
         }
 
         if_(lvOut.isOn()) {
             if_(pressure.eq(Pressure.DEPRESSURIZED)) {
-                repeat(doorOut.open())
+                cmd(doorOut.open())
             }.else_ {
-                repeat(lvOut.setOff())
+                cmd(lvOut.setOff())
             }
         }
 
         if_(lvIn.isOn()) {
             if_(pressure.eq(Pressure.PRESSURIZED)) {
-                repeat(doorIn.open())
+                cmd(doorIn.open())
             }.else_ {
-                repeat(lvIn.setOff())
+                cmd(lvIn.setOff())
             }
         }
 
         if_(lvPres.isOn()) {
-            if_(lvIn.isOn() + lvOut.isOn()) {
-                repeat(lvPres.setOff())
+            if_(lvIn.isOn() or lvOut.isOn()) {
+                cmd(lvPres.setOff())
             }
 
-            if_((lvIn.isOn() + lvOut.isOn()) * pressure.eq(Pressure.PRESSURIZED)) {
-                repeat(lvPres.setOff())
+            if_((lvIn.isOn() or lvOut.isOn()) and pressure.eq(Pressure.PRESSURIZED)) {
+                cmd(lvPres.setOff())
             }
 
-            if_(lvOut.isOff() * lvIn.isOff() * pressure.oneOf(Pressure.PRESSURIZED, Pressure.DEPRESSURIZED)) {
-                repeat(presTrigger.trigger())
+            if_(lvOut.isOff() and lvIn.isOff() and pressure.oneOf(Pressure.PRESSURIZED, Pressure.DEPRESSURIZED)) {
+                cmd(presTrigger.call())
             }
 
-            if_(pressure.eq(Pressure.DEPRESSURIZED) * lvOut.isOff() * lvIn.isOff()) {
-                repeat(airlockBar.setName("Pressurizing..."))
-            }
-
-            if_(pressure.eq(Pressure.PRESSURIZED) * lvOut.isOff() * lvIn.isOff()) {
-                repeat(airlockBar.setName("Depressurizing..."))
+            if_(lvOut.isOff() and lvIn.isOff()) {
+                if_(pressure.oneOf(Pressure.DEPRESSURIZED, Pressure.PRESSURIZING)) {
+                    cmd(airlockBar.setName("Pressurizing..."))
+                    cmd(pressureSign.setText("\nPRESSURIZING..."))
+                }.else_ {
+                    cmd(airlockBar.setName("Depressurizing..."))
+                    cmd(pressureSign.setText("\nDEPRESSURIZING..."))
+                }
             }
         }
     }

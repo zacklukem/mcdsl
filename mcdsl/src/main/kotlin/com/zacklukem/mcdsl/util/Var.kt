@@ -26,4 +26,8 @@ class VarEnum<T : Discriminant>(val namespace: String, val name: String) {
     fun oneOf(vararg value: T): OrCondition {
         return OrCondition(value.map { eq(it) }.toMutableList())
     }
+
+    fun init(): String {
+        return "scoreboard objectives add $name dummy"
+    }
 }

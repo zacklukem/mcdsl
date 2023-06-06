@@ -1,10 +1,13 @@
 package com.zacklukem.mcdsl
 
+import com.zacklukem.mcdsl.util.con
 import org.junit.jupiter.api.Test
 import kotlin.test.DefaultAsserter.assertEquals
 
 fun builder(c: CommandBuilder.() -> Unit): CommandBuilder {
-    val builder = CommandBuilder()
+    val dp = Datapack()
+    val ns = dp.namespace("test")
+    val builder = CommandBuilder(ns)
     c(builder)
     return builder
 }
@@ -19,7 +22,7 @@ class CommandBuilderTest {
         assertEquals(
             "valid commands",
             listOf("a", "b", "c"),
-            b.commands.map { it.second }
+            b.commands
         )
     }
 
@@ -96,7 +99,7 @@ class CommandBuilderTest {
                 "execute in A if B run b",
                 "execute in A run a",
             ),
-            b.commands.map { it.second }
+            b.commands
         )
     }
 }

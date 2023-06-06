@@ -2,8 +2,8 @@ package com.zacklukem.mcdsl.util
 
 interface Condition {
     operator fun not(): Condition
-    operator fun times(other: Condition): AndCondition
-    operator fun plus(other: Condition): OrCondition
+    infix fun and(other: Condition): AndCondition
+    infix fun or(other: Condition): OrCondition
     fun solve(): List<String>
 }
 
@@ -11,10 +11,10 @@ class TermCondition(private val term: String, private val negated: Boolean = fal
     override fun not(): TermCondition =
         TermCondition(term, !negated)
 
-    override fun times(other: Condition): AndCondition =
+    override fun and(other: Condition): AndCondition =
         AndCondition(mutableListOf(this, other))
 
-    override fun plus(other: Condition): OrCondition =
+    override fun or(other: Condition): OrCondition =
         OrCondition(mutableListOf(this, other))
 
     override fun solve(): List<String> {
@@ -26,12 +26,12 @@ class AndCondition(private val conditions: MutableList<Condition>) : Condition {
     override fun not(): OrCondition =
         OrCondition(conditions.map(Condition::not).toMutableList())
 
-    override fun times(other: Condition): AndCondition {
+    override fun and(other: Condition): AndCondition {
         conditions.add(other)
         return this
     }
 
-    override fun plus(other: Condition): OrCondition =
+    override fun or(other: Condition): OrCondition =
         OrCondition(mutableListOf(this, other))
 
     override fun solve(): List<String> {
@@ -58,10 +58,10 @@ class OrCondition(private val conditions: MutableList<Condition>) : Condition {
     override fun not(): AndCondition =
         AndCondition(conditions.map(Condition::not).toMutableList())
 
-    override fun times(other: Condition): AndCondition =
+    override fun and(other: Condition): AndCondition =
         AndCondition(mutableListOf(this, other))
 
-    override fun plus(other: Condition): OrCondition {
+    override fun or(other: Condition): OrCondition {
         conditions.add(other)
         return this
     }
