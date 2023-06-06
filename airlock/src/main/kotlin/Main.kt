@@ -78,13 +78,13 @@ fun airlock(pack: Datapack) {
             cmd(airlockBar.setColor(Color.GREEN))
             cmd(lvPres.setOff())
             if_(pressure.eq(Pressure.PRESSURIZING)) {
-                cmd(pressureSign.setText("\nPRESSURIZED"))
+                cmd(pressureSign.setText("\n@bold{@green{PRESSURIZED}}"))
                 cmd(airlockBar.setName("Pressurized"))
                 cmd(pressure.set(Pressure.PRESSURIZED))
             }
 
             if_(pressure.eq(Pressure.DEPRESSURIZING)) {
-                cmd(pressureSign.setText("\nDEPRESSURIZED"))
+                cmd(pressureSign.setText("\n@bold{@green{DEPRESSURIZED}}"))
                 cmd(airlockBar.setName("Depressurized"))
                 cmd(pressure.set(Pressure.DEPRESSURIZED))
             }
@@ -104,14 +104,14 @@ fun airlock(pack: Datapack) {
 
         if_(prOut.isOn()) {
             cmd(pressure.set(Pressure.DEPRESSURIZED))
-            cmd(pressureSign.setText("\nDEPRESSURIZED"))
+            cmd(pressureSign.setText("\n@bold{@#00ff00{DEPRESSURIZED}}"))
             cmd(doorOut.open())
             cmd(lvOut.setOff())
         }
 
         if_(prIn.isOn()) {
             cmd(pressure.set(Pressure.PRESSURIZED))
-            cmd(pressureSign.setText("\nPRESSURIZED"))
+            cmd(pressureSign.setText("\n@bold{@#00ff00{PRESSURIZED}}"))
             cmd(doorIn.open())
             cmd(lvIn.setOff())
         }
@@ -156,10 +156,10 @@ fun airlock(pack: Datapack) {
             if_(lvOut.isOff() and lvIn.isOff()) {
                 if_(pressure.oneOf(Pressure.DEPRESSURIZED, Pressure.PRESSURIZING)) {
                     cmd(airlockBar.setName("Pressurizing..."))
-                    cmd(pressureSign.setText("\nPRESSURIZING..."))
+                    cmd(pressureSign.setText("\n@italic{@red{PRESSURIZING...}}"))
                 }.else_ {
                     cmd(airlockBar.setName("Depressurizing..."))
-                    cmd(pressureSign.setText("\nDEPRESSURIZING..."))
+                    cmd(pressureSign.setText("\n@italic{@red{DEPRESSURIZING...}}"))
                 }
             }
         }
