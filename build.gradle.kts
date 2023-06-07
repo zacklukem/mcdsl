@@ -10,6 +10,7 @@ repositories {
 plugins {
     kotlin("jvm") version "1.6.21"
     `java-library`
+    `maven-publish`
 }
 
 dependencies {
@@ -22,4 +23,14 @@ tasks.test {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            artifactId = "mcdsl"
+
+            from(components["java"])
+        }
+    }
 }
