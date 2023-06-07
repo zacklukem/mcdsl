@@ -68,19 +68,19 @@ data class PlayerUUID(val id: UUID) : EntityArg {
  * Minecraft selectors (@a, @p, ...)
  */
 enum class Selector : EntityArg {
-    /** @p */
+    /** \@p */
     P,
 
-    /** @r */
+    /** \@r */
     R,
 
-    /** @a */
+    /** \@a */
     A,
 
-    /** @e */
+    /** \@e */
     E,
 
-    /** @s */
+    /** \@s */
     S;
 
     private val arguments = mutableMapOf<String, String>()
