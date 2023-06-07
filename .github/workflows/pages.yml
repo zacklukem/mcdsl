@@ -9,9 +9,10 @@ permissions:
   contents: read
   pages: write
   id-token: write
-  concurrency:
-    cancel-in-progress: false
-    group: ${{ github.workflow }}-${{ github.ref }}
+
+concurrency:
+  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   build:
