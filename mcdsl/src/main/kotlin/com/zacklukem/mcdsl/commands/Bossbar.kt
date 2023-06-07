@@ -1,6 +1,6 @@
 package com.zacklukem.mcdsl.commands
 
-enum class BossbarSetting(val repr: String) {
+enum class BossbarSetting(private val repr: String) {
     MAX("max"),
     PLAYERS("players"),
     VALUE("value"),
@@ -9,7 +9,7 @@ enum class BossbarSetting(val repr: String) {
     override fun toString(): String = repr
 }
 
-enum class Color(val repr: String) {
+enum class Color(private val repr: String) {
     BLUE("blue"),
     GREEN("green"),
     PINK("pink"),
@@ -21,7 +21,7 @@ enum class Color(val repr: String) {
     override fun toString(): String = repr
 }
 
-enum class Style(val repr: String) {
+enum class Style(private val repr: String) {
     // notched_6|notched_10|notched_12|notched_20|progress
     NOTCHED_6("notched_6"),
     NOTCHED_10("notched_10"),

@@ -175,5 +175,5 @@ fun main(args: Array<String>) {
 
     airlock(pack)
 
-    pack.print(Path(args[0]))
+    pack.print(args[0])
 }

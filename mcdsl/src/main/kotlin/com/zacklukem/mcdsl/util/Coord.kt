@@ -2,7 +2,10 @@ package com.zacklukem.mcdsl.util
 
 import kotlin.math.roundToInt
 
-enum class Dir(val repr: String) {
+/**
+ * A minecraft cardinal direction
+ */
+enum class Dir(private val repr: String) {
     NORTH("north"),
     SOUTH("south"),
     EAST("east"),
@@ -13,7 +16,7 @@ enum class Dir(val repr: String) {
     }
 }
 
-interface CoordComponent {
+sealed interface CoordComponent {
     operator fun plus(other: CoordComponent): CoordComponent
     operator fun minus(other: CoordComponent): CoordComponent
     operator fun times(other: Float): CoordComponent
@@ -21,6 +24,8 @@ interface CoordComponent {
 }
 
 class Tilde(val offset: Float = 0.0f) : CoordComponent {
+    constructor(offset: Int) : this(offset.toFloat())
+
     override fun plus(other: CoordComponent): CoordComponent {
         return when (other) {
             is Number -> {
@@ -28,9 +33,6 @@ class Tilde(val offset: Float = 0.0f) : CoordComponent {
             }
             is Tilde -> {
                 Tilde(offset + other.offset)
-            }
-            else -> {
-                throw IllegalArgumentException("Cannot add Tilde to $other")
             }
         }
     }
@@ -42,9 +44,6 @@ class Tilde(val offset: Float = 0.0f) : CoordComponent {
             }
             is Tilde -> {
                 Tilde(offset - other.offset)
-            }
-            else -> {
-                throw IllegalArgumentException("Cannot subtract Tilde from $other")
             }
         }
     }
@@ -73,9 +72,6 @@ class Number(val v: Float) : CoordComponent {
             is Tilde -> {
                 Tilde(v + other.offset)
             }
-            else -> {
-                throw IllegalArgumentException("Cannot add Tilde to $other")
-            }
         }
     }
 
@@ -86,9 +82,6 @@ class Number(val v: Float) : CoordComponent {
             }
             is Tilde -> {
                 Tilde(v - other.offset)
-            }
-            else -> {
-                throw IllegalArgumentException("Cannot subtract Tilde from $other")
             }
         }
     }
@@ -106,6 +99,29 @@ class Number(val v: Float) : CoordComponent {
     }
 }
 
+/**
+ * Represents a coordinate in the Minecraft world.
+ *
+ * This also includes the tilde (~) operator, which represents the current position of caller.
+ *
+ * This supports math using the +, -, *, and / operators.
+ *
+ * Tilde values don't support multiplication or division.
+ *
+ * By default, the toString method will return the coordinate in the format `x y z`. With all values rounded to
+ * integers (with tildes).
+ *
+ * If you want to output floating point values, you can use the [Coord.toFloatString] method.
+ *
+ * Example:
+ * ```
+ * val coord = Coord(1, 2, 3)
+ * val coord2 = Coord(4, 5, 6)
+ * val coord3 = coord + coord2
+ * val coord4 = coord3 - Coord(Tilde(), 5, 6)
+ * val coord4 = coord3 - Coord(Tilde(), 5, Tilde())
+ * ```
+ */
 class Coord(val x: CoordComponent, val y: CoordComponent, val z: CoordComponent) {
 
     constructor(x: Int, y: Int, z: Int) : this(Number(x), Number(y), Number(z))
@@ -136,10 +152,23 @@ class Coord(val x: CoordComponent, val y: CoordComponent, val z: CoordComponent)
     operator fun div(other: Float): Coord =
         Coord(x / other, y / other, z / other)
 
+    /**
+     * Convert this coordinate to the format `x y z` with integer values.
+     */
     override fun toString(): String {
         return "$x $y $z"
     }
 
+    /**
+     * Convert this coordinate to the format `x y z` with floating point values.
+     */
+    fun toFloatString(): String {
+        return "$x $y $z"
+    }
+
+    /**
+     * Set the block at this coordinate.
+     */
     fun setblock(block: String): String {
         return "setblock $this $block"
     }
