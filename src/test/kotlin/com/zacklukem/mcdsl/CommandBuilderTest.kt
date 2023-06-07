@@ -82,24 +82,34 @@ class CommandBuilderTest {
         assertEquals(
             "valid commands",
             listOf(
+                "execute if A run a",
+                "execute if A if B run b",
                 "execute if A if B as C run c",
                 "execute if A if B at D run d",
-                "execute if A if B run b",
-                "execute if A run a",
+                "execute as A run a",
+                "execute as A if B run b",
                 "execute as A if B as C run c",
                 "execute as A if B at D run d",
-                "execute as A if B run b",
-                "execute as A run a",
+                "execute at A run a",
+                "execute at A if B run b",
                 "execute at A if B as C run c",
                 "execute at A if B at D run d",
-                "execute at A if B run b",
-                "execute at A run a",
-                "execute in A if B as C run c",
-                "execute in A if B at D run d",
-                "execute in A if B run b",
                 "execute in A run a",
+                "execute in A if B run b",
+                "execute in A if B as C run c",
+                "execute in A if B at D run d"
             ),
             b.commands
         )
+    }
+
+    @Test
+    fun testChainedExecutes() {
+        val b = builder {
+            as_("a").align_("b") {
+                cmd("c")
+            }
+        }
+        assertEquals("valid commands", listOf("execute as a align b run c"), b.commands)
     }
 }

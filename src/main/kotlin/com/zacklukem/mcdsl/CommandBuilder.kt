@@ -80,12 +80,33 @@ fun days(days: Float): String {
 class CommandBuilder internal constructor(private val ns: Namespace) {
     internal val commands: MutableList<String> = mutableListOf()
     private var addExecuteCallback: ((String, String) -> Unit)? = null
+    private var addCmdCallback: ((String) -> Unit)? = null
 
     private fun addExecute(modifier: String, cmd: String) {
         if (addExecuteCallback != null) {
             addExecuteCallback!!.invoke(modifier, cmd)
         } else {
             cmd("execute $modifier run $cmd")
+        }
+    }
+
+    /**
+     * Creates a new command
+     */
+    fun cmd(cmd: String) {
+        if (addCmdCallback != null) {
+            addCmdCallback!!.invoke(cmd)
+        } else {
+            commands.add(cmd)
+        }
+    }
+
+    /**
+     * Creates multiple commands
+     */
+    fun cmd(cmds: List<String>) {
+        cmds.forEach {
+            this.cmd(it)
         }
     }
 
@@ -165,13 +186,21 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
                 addExecute("$s $modifier", cmd)
             }
         }
-        c(builder)
-        for (cmd in builder.commands) {
+        builder.addCmdCallback = { cmd ->
             for (s in solved) {
                 addExecute(s, cmd)
             }
         }
+        c(builder)
         return ElseBuilder(this, cond)
+    }
+
+    /**
+     * @see com.zacklukem.mcdsl.CommandBuilder.as_
+     */
+    @Suppress("FunctionName")
+    fun as_(_as: String): CommandBuilder {
+        return as_(PlayerName(_as))
     }
 
     /**
@@ -203,14 +232,22 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
      */
     @Suppress("FunctionName")
     fun as_(_as: EntityArg, c: CommandBuilder.() -> Unit) {
+        c(as_(_as))
+    }
+
+    /**
+     * @see com.zacklukem.mcdsl.CommandBuilder.as_
+     */
+    @Suppress("FunctionName")
+    fun as_(_as: EntityArg): CommandBuilder {
         val builder = CommandBuilder(ns)
         builder.addExecuteCallback = { modifier, cmd ->
             addExecute("as $_as $modifier", cmd)
         }
-        c(builder)
-        for (cmd in builder.commands) {
+        builder.addCmdCallback = { cmd ->
             addExecute("as $_as", cmd)
         }
+        return builder
     }
 
     /**
@@ -234,14 +271,22 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
      */
     @Suppress("FunctionName")
     fun align_(_align: String, c: CommandBuilder.() -> Unit) {
+        c(align_(_align))
+    }
+
+    /**
+     * @see com.zacklukem.mcdsl.CommandBuilder.anchored_
+     */
+    @Suppress("FunctionName")
+    fun align_(_align: String): CommandBuilder {
         val builder = CommandBuilder(ns)
         builder.addExecuteCallback = { modifier, cmd ->
             addExecute("align $_align $modifier", cmd)
         }
-        c(builder)
-        for (cmd in builder.commands) {
+        builder.addCmdCallback = { cmd ->
             addExecute("align $_align", cmd)
         }
+        return builder
     }
 
     /**
@@ -265,14 +310,30 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
      */
     @Suppress("FunctionName")
     fun anchored_(_anchor: EntityAnchor, c: CommandBuilder.() -> Unit) {
+        c(anchored_(_anchor))
+    }
+
+    /**
+     * @see com.zacklukem.mcdsl.CommandBuilder.anchored_
+     */
+    @Suppress("FunctionName")
+    fun anchored_(_anchor: EntityAnchor): CommandBuilder {
         val builder = CommandBuilder(ns)
         builder.addExecuteCallback = { modifier, cmd ->
             addExecute("anchored $_anchor $modifier", cmd)
         }
-        c(builder)
-        for (cmd in builder.commands) {
+        builder.addCmdCallback = { cmd ->
             addExecute("anchored $_anchor", cmd)
         }
+        return builder
+    }
+
+    /**
+     * @see com.zacklukem.mcdsl.CommandBuilder.at_
+     */
+    @Suppress("FunctionName")
+    fun at_(_at: String): CommandBuilder {
+        return at_(PlayerName(_at))
     }
 
     /**
@@ -304,14 +365,22 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
      */
     @Suppress("FunctionName")
     fun at_(_at: EntityArg, c: CommandBuilder.() -> Unit) {
+        c(at_(_at))
+    }
+
+    /**
+     * @see com.zacklukem.mcdsl.CommandBuilder.at_
+     */
+    @Suppress("FunctionName")
+    fun at_(_at: EntityArg): CommandBuilder {
         val builder = CommandBuilder(ns)
         builder.addExecuteCallback = { modifier, cmd ->
             addExecute("at $_at $modifier", cmd)
         }
-        c(builder)
-        for (cmd in builder.commands) {
+        builder.addCmdCallback = { cmd ->
             addExecute("at $_at", cmd)
         }
+        return builder
     }
 
     /**
@@ -335,14 +404,22 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
      */
     @Suppress("FunctionName")
     fun in_(_in: String, c: CommandBuilder.() -> Unit) {
+        c(in_(_in))
+    }
+
+    /**
+     * @see com.zacklukem.mcdsl.CommandBuilder.in_
+     */
+    @Suppress("FunctionName")
+    fun in_(_in: String): CommandBuilder {
         val builder = CommandBuilder(ns)
         builder.addExecuteCallback = { modifier, cmd ->
             addExecute("in $_in $modifier", cmd)
         }
-        c(builder)
-        for (cmd in builder.commands) {
+        builder.addCmdCallback = { cmd ->
             addExecute("in $_in", cmd)
         }
+        return builder
     }
 
     /**
@@ -366,14 +443,22 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
      */
     @Suppress("FunctionName")
     fun facing_(_pos: Coord, c: CommandBuilder.() -> Unit) {
+        c(facing_(_pos))
+    }
+
+    /**
+     * @see com.zacklukem.mcdsl.CommandBuilder.facing_
+     */
+    @Suppress("FunctionName")
+    fun facing_(_pos: Coord): CommandBuilder {
         val builder = CommandBuilder(ns)
         builder.addExecuteCallback = { modifier, cmd ->
             addExecute("facing $_pos $modifier", cmd)
         }
-        c(builder)
-        for (cmd in builder.commands) {
+        builder.addCmdCallback = { cmd ->
             addExecute("facing $_pos", cmd)
         }
+        return builder
     }
 
     /**
@@ -397,14 +482,19 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
      */
     @Suppress("FunctionName")
     fun on_(_rel: RelationArg, c: CommandBuilder.() -> Unit) {
+        c(on_(_rel))
+    }
+
+    @Suppress("FunctionName")
+    fun on_(_rel: RelationArg): CommandBuilder {
         val builder = CommandBuilder(ns)
         builder.addExecuteCallback = { modifier, cmd ->
             addExecute("on $_rel $modifier", cmd)
         }
-        c(builder)
-        for (cmd in builder.commands) {
+        builder.addCmdCallback = { cmd ->
             addExecute("on $_rel", cmd)
         }
+        return builder
     }
 
     /**
@@ -428,14 +518,30 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
      */
     @Suppress("FunctionName")
     fun positioned_(_pos: Coord, c: CommandBuilder.() -> Unit) {
+        c(positioned_(_pos))
+    }
+
+    /**
+     * @see com.zacklukem.mcdsl.CommandBuilder.positioned_
+     */
+    @Suppress("FunctionName")
+    fun positioned_(_pos: Coord): CommandBuilder {
         val builder = CommandBuilder(ns)
         builder.addExecuteCallback = { modifier, cmd ->
             addExecute("positioned $_pos $modifier", cmd)
         }
-        c(builder)
-        for (cmd in builder.commands) {
+        builder.addCmdCallback = { cmd ->
             addExecute("positioned $_pos", cmd)
         }
+        return builder
+    }
+
+    /**
+     * @see com.zacklukem.mcdsl.CommandBuilder.positioned_as_
+     */
+    @Suppress("FunctionName")
+    fun positioned_as_(_pos: String): CommandBuilder {
+        return positioned_as_(PlayerName(_pos))
     }
 
     /**
@@ -467,14 +573,22 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
      */
     @Suppress("FunctionName")
     fun positioned_as_(_pos: EntityArg, c: CommandBuilder.() -> Unit) {
+        c(positioned_as_(_pos))
+    }
+
+    /**
+     * @see com.zacklukem.mcdsl.CommandBuilder.positioned_as_
+     */
+    @Suppress("FunctionName")
+    fun positioned_as_(_pos: EntityArg): CommandBuilder {
         val builder = CommandBuilder(ns)
         builder.addExecuteCallback = { modifier, cmd ->
             addExecute("positioned as $_pos $modifier", cmd)
         }
-        c(builder)
-        for (cmd in builder.commands) {
+        builder.addCmdCallback = { cmd ->
             addExecute("positioned as $_pos", cmd)
         }
+        return builder
     }
 
     /**
@@ -498,14 +612,22 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
      */
     @Suppress("FunctionName")
     fun positioned_over_(_pos: HeightmapArg, c: CommandBuilder.() -> Unit) {
+        c(positioned_over_(_pos))
+    }
+
+    /**
+     * @see com.zacklukem.mcdsl.CommandBuilder.positioned_over_
+     */
+    @Suppress("FunctionName")
+    fun positioned_over_(_pos: HeightmapArg): CommandBuilder {
         val builder = CommandBuilder(ns)
         builder.addExecuteCallback = { modifier, cmd ->
             addExecute("positioned over $_pos $modifier", cmd)
         }
-        c(builder)
-        for (cmd in builder.commands) {
+        builder.addCmdCallback = { cmd ->
             addExecute("positioned over $_pos", cmd)
         }
+        return builder
     }
 
     /**
@@ -529,14 +651,30 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
      */
     @Suppress("FunctionName")
     fun rotated_(_pos: Rotation, c: CommandBuilder.() -> Unit) {
+        c(rotated_(_pos))
+    }
+
+    /**
+     * @see com.zacklukem.mcdsl.CommandBuilder.rotated_
+     */
+    @Suppress("FunctionName")
+    fun rotated_(_pos: Rotation): CommandBuilder {
         val builder = CommandBuilder(ns)
         builder.addExecuteCallback = { modifier, cmd ->
             addExecute("rotated $_pos $modifier", cmd)
         }
-        c(builder)
-        for (cmd in builder.commands) {
+        builder.addCmdCallback = { cmd ->
             addExecute("rotated $_pos", cmd)
         }
+        return builder
+    }
+
+    /**
+     * @see com.zacklukem.mcdsl.CommandBuilder.rotated_as_
+     */
+    @Suppress("FunctionName")
+    fun rotated_as_(_pos: String): CommandBuilder {
+        return rotated_as_(PlayerName(_pos))
     }
 
     /**
@@ -568,14 +706,22 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
      */
     @Suppress("FunctionName")
     fun rotated_as_(_pos: EntityArg, c: CommandBuilder.() -> Unit) {
+        c(rotated_as_(_pos))
+    }
+
+    /**
+     * @see com.zacklukem.mcdsl.CommandBuilder.rotated_as_
+     */
+    @Suppress("FunctionName")
+    fun rotated_as_(_pos: EntityArg): CommandBuilder {
         val builder = CommandBuilder(ns)
         builder.addExecuteCallback = { modifier, cmd ->
             addExecute("rotated as $_pos $modifier", cmd)
         }
-        c(builder)
-        for (cmd in builder.commands) {
+        builder.addCmdCallback = { cmd ->
             addExecute("rotated as $_pos", cmd)
         }
+        return builder
     }
 
     /**
@@ -599,29 +745,21 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
      */
     @Suppress("FunctionName")
     fun summon_(_entity: String, c: CommandBuilder.() -> Unit) {
+        c(summon_(_entity))
+    }
+
+    /**
+     * @see com.zacklukem.mcdsl.CommandBuilder.summon_
+     */
+    @Suppress("FunctionName")
+    fun summon_(_entity: String): CommandBuilder {
         val builder = CommandBuilder(ns)
         builder.addExecuteCallback = { modifier, cmd ->
             addExecute("summon $_entity $modifier", cmd)
         }
-        c(builder)
-        for (cmd in builder.commands) {
+        builder.addCmdCallback = { cmd ->
             addExecute("summon $_entity", cmd)
         }
-    }
-
-    /**
-     * Creates a new command
-     */
-    fun cmd(cmd: String) {
-        commands.add(cmd)
-    }
-
-    /**
-     * Creates multiple commands
-     */
-    fun cmd(cmds: List<String>) {
-        cmds.forEach {
-            this.cmd(it)
-        }
+        return builder
     }
 }
