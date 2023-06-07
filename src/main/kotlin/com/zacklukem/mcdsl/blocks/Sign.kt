@@ -1,5 +1,3 @@
-@file:Suppress("NAME_SHADOWING")
-
 package com.zacklukem.mcdsl.blocks
 
 import com.zacklukem.mcdsl.util.Coord
