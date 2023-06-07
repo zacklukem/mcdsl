@@ -28,7 +28,7 @@ enum class HeightmapArg {
 /**
  * Minecraft relation arguments
  *
- * @see com.zacklukem.mcdsl.CommandBuilder.on_
+ * @see com.zacklukem.mcdsl.CommandBuilder.on
  */
 enum class RelationArg {
     ATTACKER, CONTROLLER, LEASHER, ORIGIN, OWNER, PASSENGERS, TARGET, VEHICLE;

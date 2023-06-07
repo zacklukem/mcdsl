@@ -36,7 +36,7 @@ class CommandBuilderTest {
                     as_("C") {
                         cmd("c")
                     }
-                    at_("D") {
+                    at("D") {
                         cmd("d")
                     }
                 }
@@ -48,19 +48,19 @@ class CommandBuilderTest {
                     as_("C") {
                         cmd("c")
                     }
-                    at_("D") {
+                    at("D") {
                         cmd("d")
                     }
                 }
             }
-            at_("A") {
+            at("A") {
                 cmd("a")
                 if_(con("B")) {
                     cmd("b")
                     as_("C") {
                         cmd("c")
                     }
-                    at_("D") {
+                    at("D") {
                         cmd("d")
                     }
                 }
@@ -72,7 +72,7 @@ class CommandBuilderTest {
                     as_("C") {
                         cmd("c")
                     }
-                    at_("D") {
+                    at("D") {
                         cmd("d")
                     }
                 }
@@ -106,7 +106,7 @@ class CommandBuilderTest {
     @Test
     fun testChainedExecutes() {
         val b = builder {
-            as_("a").align_("b") {
+            as_("a").align("b") {
                 cmd("c")
             }
         }

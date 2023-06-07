@@ -21,7 +21,7 @@ class ElseBuilder internal constructor(
 /**
  * Formats a string with ticks as units
  *
- * @see com.zacklukem.mcdsl.CommandBuilder.schedule_
+ * @see com.zacklukem.mcdsl.CommandBuilder.schedule
  */
 fun ticks(ticks: Int): String {
     return "${ticks}t"
@@ -30,7 +30,7 @@ fun ticks(ticks: Int): String {
 /**
  * Formats a string with ticks as units
  *
- * @see com.zacklukem.mcdsl.CommandBuilder.schedule_
+ * @see com.zacklukem.mcdsl.CommandBuilder.schedule
  */
 fun ticks(ticks: Float): String {
     return "${ticks}t"
@@ -39,7 +39,7 @@ fun ticks(ticks: Float): String {
 /**
  * Formats a string with seconds as units
  *
- * @see com.zacklukem.mcdsl.CommandBuilder.schedule_
+ * @see com.zacklukem.mcdsl.CommandBuilder.schedule
  */
 fun secs(secs: Int): String {
     return "${secs}s"
@@ -48,7 +48,7 @@ fun secs(secs: Int): String {
 /**
  * Formats a string with ticks as units
  *
- * @see com.zacklukem.mcdsl.CommandBuilder.schedule_
+ * @see com.zacklukem.mcdsl.CommandBuilder.schedule
  */
 fun secs(secs: Float): String {
     return "${secs}s"
@@ -57,7 +57,7 @@ fun secs(secs: Float): String {
 /**
  * Formats a string with days as units
  *
- * @see com.zacklukem.mcdsl.CommandBuilder.schedule_
+ * @see com.zacklukem.mcdsl.CommandBuilder.schedule
  */
 fun days(days: Int): String {
     return "${days}d"
@@ -66,7 +66,7 @@ fun days(days: Int): String {
 /**
  * Formats a string with days as units
  *
- * @see com.zacklukem.mcdsl.CommandBuilder.schedule_
+ * @see com.zacklukem.mcdsl.CommandBuilder.schedule
  */
 fun days(days: Float): String {
     return "${days}d"
@@ -128,9 +128,9 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
      * @see com.zacklukem.mcdsl.days
      */
     @Suppress("FunctionName")
-    fun schedule_(time: String, c: CommandBuilder.() -> Unit): Func {
+    fun schedule(time: String, c: CommandBuilder.() -> Unit): Func {
         val f = ns.function("schedule_${UUID.randomUUID()}", c)
-        return schedule_(time, f)
+        return schedule(time, f)
     }
 
     /**
@@ -147,7 +147,7 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
      * @see com.zacklukem.mcdsl.days
      */
     @Suppress("FunctionName")
-    fun schedule_(time: String, f: Func): Func {
+    fun schedule(time: String, f: Func): Func {
         cmd("schedule function ${f.namespace}:${f.name} $time")
         return f
     }
@@ -155,8 +155,8 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
     /**
      * Creates one or more execute commands following the given condition
      *
-     * This can be nested with [if_], [as_], [align_], [anchored_], [at_], [in_], [facing_], [on_], [positioned_],
-     * [positioned_as_], [positioned_over_], [rotated_], [rotated_as_] and [summon_] to create more complex conditions
+     * This can be nested with [if_], [as_], [align], [anchored], [at], [in_], [facing], [on], [positioned],
+     * [positioned_as], [positioned_over], [rotated], [rotated_as] and [summon] to create more complex conditions
      *
      * This also returns an else builder that can be used to form an else statement.
      *
@@ -214,8 +214,8 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
     /**
      * Creates one or more execute commands running as the given entity
      *
-     * This can be nested with [if_], [as_], [align_], [anchored_], [at_], [in_], [facing_], [on_], [positioned_],
-     * [positioned_as_], [positioned_over_], [rotated_], [rotated_as_] and [summon_] to create more complex conditions
+     * This can be nested with [if_], [as_], [align], [anchored], [at], [in_], [facing], [on], [positioned],
+     * [positioned_as], [positioned_over], [rotated], [rotated_as] and [summon] to create more complex conditions
      *
      * Example:
      * ```
@@ -253,8 +253,8 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
     /**
      * Creates one or more execute commands aligned in to the given axes
      *
-     * This can be nested with [if_], [as_], [align_], [anchored_], [at_], [in_], [facing_], [on_], [positioned_],
-     * [positioned_as_], [positioned_over_], [rotated_], [rotated_as_] and [summon_] to create more complex conditions
+     * This can be nested with [if_], [as_], [align], [anchored], [at], [in_], [facing], [on], [positioned],
+     * [positioned_as], [positioned_over], [rotated], [rotated_as] and [summon] to create more complex conditions
      *
      * Example:
      * ```
@@ -270,15 +270,15 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
      * ```
      */
     @Suppress("FunctionName")
-    fun align_(_align: String, c: CommandBuilder.() -> Unit) {
-        c(align_(_align))
+    fun align(_align: String, c: CommandBuilder.() -> Unit) {
+        c(align(_align))
     }
 
     /**
-     * @see com.zacklukem.mcdsl.CommandBuilder.anchored_
+     * @see com.zacklukem.mcdsl.CommandBuilder.anchored
      */
     @Suppress("FunctionName")
-    fun align_(_align: String): CommandBuilder {
+    fun align(_align: String): CommandBuilder {
         val builder = CommandBuilder(ns)
         builder.addExecuteCallback = { modifier, cmd ->
             addExecute("align $_align $modifier", cmd)
@@ -292,8 +292,8 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
     /**
      * Creates one or more execute commands anchored to the entity anchor
      *
-     * This can be nested with [if_], [as_], [align_], [anchored_], [at_], [in_], [facing_], [on_], [positioned_],
-     * [positioned_as_], [positioned_over_], [rotated_], [rotated_as_] and [summon_] to create more complex conditions
+     * This can be nested with [if_], [as_], [align], [anchored], [at], [in_], [facing], [on], [positioned],
+     * [positioned_as], [positioned_over], [rotated], [rotated_as] and [summon] to create more complex conditions
      *
      * Example:
      * ```
@@ -309,15 +309,15 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
      * ```
      */
     @Suppress("FunctionName")
-    fun anchored_(_anchor: EntityAnchor, c: CommandBuilder.() -> Unit) {
-        c(anchored_(_anchor))
+    fun anchored(_anchor: EntityAnchor, c: CommandBuilder.() -> Unit) {
+        c(anchored(_anchor))
     }
 
     /**
-     * @see com.zacklukem.mcdsl.CommandBuilder.anchored_
+     * @see com.zacklukem.mcdsl.CommandBuilder.anchored
      */
     @Suppress("FunctionName")
-    fun anchored_(_anchor: EntityAnchor): CommandBuilder {
+    fun anchored(_anchor: EntityAnchor): CommandBuilder {
         val builder = CommandBuilder(ns)
         builder.addExecuteCallback = { modifier, cmd ->
             addExecute("anchored $_anchor $modifier", cmd)
@@ -329,26 +329,26 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
     }
 
     /**
-     * @see com.zacklukem.mcdsl.CommandBuilder.at_
+     * @see com.zacklukem.mcdsl.CommandBuilder.at
      */
     @Suppress("FunctionName")
-    fun at_(_at: String): CommandBuilder {
-        return at_(PlayerName(_at))
+    fun at(_at: String): CommandBuilder {
+        return at(PlayerName(_at))
     }
 
     /**
-     * @see com.zacklukem.mcdsl.CommandBuilder.at_
+     * @see com.zacklukem.mcdsl.CommandBuilder.at
      */
     @Suppress("FunctionName")
-    fun at_(_at: String, c: CommandBuilder.() -> Unit) {
-        at_(PlayerName(_at), c)
+    fun at(_at: String, c: CommandBuilder.() -> Unit) {
+        at(PlayerName(_at), c)
     }
 
     /**
      * Creates one or more execute commands running at the position of given entity
      *
-     * This can be nested with [if_], [as_], [align_], [anchored_], [at_], [in_], [facing_], [on_], [positioned_],
-     * [positioned_as_], [positioned_over_], [rotated_], [rotated_as_] and [summon_] to create more complex conditions
+     * This can be nested with [if_], [as_], [align], [anchored], [at], [in_], [facing], [on], [positioned],
+     * [positioned_as], [positioned_over], [rotated], [rotated_as] and [summon] to create more complex conditions
      *
      * Example:
      * ```
@@ -364,15 +364,15 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
      * ```
      */
     @Suppress("FunctionName")
-    fun at_(_at: EntityArg, c: CommandBuilder.() -> Unit) {
-        c(at_(_at))
+    fun at(_at: EntityArg, c: CommandBuilder.() -> Unit) {
+        c(at(_at))
     }
 
     /**
-     * @see com.zacklukem.mcdsl.CommandBuilder.at_
+     * @see com.zacklukem.mcdsl.CommandBuilder.at
      */
     @Suppress("FunctionName")
-    fun at_(_at: EntityArg): CommandBuilder {
+    fun at(_at: EntityArg): CommandBuilder {
         val builder = CommandBuilder(ns)
         builder.addExecuteCallback = { modifier, cmd ->
             addExecute("at $_at $modifier", cmd)
@@ -386,8 +386,8 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
     /**
      * Creates one or more execute commands running in the given dimension
      *
-     * This can be nested with [if_], [as_], [align_], [anchored_], [at_], [in_], [facing_], [on_], [positioned_],
-     * [positioned_as_], [positioned_over_], [rotated_], [rotated_as_] and [summon_] to create more complex conditions
+     * This can be nested with [if_], [as_], [align], [anchored], [at], [in_], [facing], [on], [positioned],
+     * [positioned_as], [positioned_over], [rotated], [rotated_as] and [summon] to create more complex conditions
      *
      * Example:
      * ```
@@ -425,8 +425,8 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
     /**
      * Creates one or more execute commands facing a given position
      *
-     * This can be nested with [if_], [as_], [align_], [anchored_], [at_], [in_], [facing_], [on_], [positioned_],
-     * [positioned_as_], [positioned_over_], [rotated_], [rotated_as_] and [summon_] to create more complex conditions
+     * This can be nested with [if_], [as_], [align], [anchored], [at], [in_], [facing], [on], [positioned],
+     * [positioned_as], [positioned_over], [rotated], [rotated_as] and [summon] to create more complex conditions
      *
      * Example:
      * ```
@@ -442,15 +442,15 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
      * ```
      */
     @Suppress("FunctionName")
-    fun facing_(_pos: Coord, c: CommandBuilder.() -> Unit) {
-        c(facing_(_pos))
+    fun facing(_pos: Coord, c: CommandBuilder.() -> Unit) {
+        c(facing(_pos))
     }
 
     /**
-     * @see com.zacklukem.mcdsl.CommandBuilder.facing_
+     * @see com.zacklukem.mcdsl.CommandBuilder.facing
      */
     @Suppress("FunctionName")
-    fun facing_(_pos: Coord): CommandBuilder {
+    fun facing(_pos: Coord): CommandBuilder {
         val builder = CommandBuilder(ns)
         builder.addExecuteCallback = { modifier, cmd ->
             addExecute("facing $_pos $modifier", cmd)
@@ -464,8 +464,8 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
     /**
      * Creates one or more execute commands on a relation to the given entity
      *
-     * This can be nested with [if_], [as_], [align_], [anchored_], [at_], [in_], [facing_], [on_], [positioned_],
-     * [positioned_as_], [positioned_over_], [rotated_], [rotated_as_] and [summon_] to create more complex conditions
+     * This can be nested with [if_], [as_], [align], [anchored], [at], [in_], [facing], [on], [positioned],
+     * [positioned_as], [positioned_over], [rotated], [rotated_as] and [summon] to create more complex conditions
      *
      * Example:
      * ```
@@ -481,12 +481,12 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
      * ```
      */
     @Suppress("FunctionName")
-    fun on_(_rel: RelationArg, c: CommandBuilder.() -> Unit) {
-        c(on_(_rel))
+    fun on(_rel: RelationArg, c: CommandBuilder.() -> Unit) {
+        c(on(_rel))
     }
 
     @Suppress("FunctionName")
-    fun on_(_rel: RelationArg): CommandBuilder {
+    fun on(_rel: RelationArg): CommandBuilder {
         val builder = CommandBuilder(ns)
         builder.addExecuteCallback = { modifier, cmd ->
             addExecute("on $_rel $modifier", cmd)
@@ -500,8 +500,8 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
     /**
      * Creates one or more execute commands positioned at a given position
      *
-     * This can be nested with [if_], [as_], [align_], [anchored_], [at_], [in_], [facing_], [on_], [positioned_],
-     * [positioned_as_], [positioned_over_], [rotated_], [rotated_as_] and [summon_] to create more complex conditions
+     * This can be nested with [if_], [as_], [align], [anchored], [at], [in_], [facing], [on], [positioned],
+     * [positioned_as], [positioned_over], [rotated], [rotated_as] and [summon] to create more complex conditions
      *
      * Example:
      * ```
@@ -517,15 +517,15 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
      * ```
      */
     @Suppress("FunctionName")
-    fun positioned_(_pos: Coord, c: CommandBuilder.() -> Unit) {
-        c(positioned_(_pos))
+    fun positioned(_pos: Coord, c: CommandBuilder.() -> Unit) {
+        c(positioned(_pos))
     }
 
     /**
-     * @see com.zacklukem.mcdsl.CommandBuilder.positioned_
+     * @see com.zacklukem.mcdsl.CommandBuilder.positioned
      */
     @Suppress("FunctionName")
-    fun positioned_(_pos: Coord): CommandBuilder {
+    fun positioned(_pos: Coord): CommandBuilder {
         val builder = CommandBuilder(ns)
         builder.addExecuteCallback = { modifier, cmd ->
             addExecute("positioned $_pos $modifier", cmd)
@@ -537,26 +537,26 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
     }
 
     /**
-     * @see com.zacklukem.mcdsl.CommandBuilder.positioned_as_
+     * @see com.zacklukem.mcdsl.CommandBuilder.positioned_as
      */
     @Suppress("FunctionName")
-    fun positioned_as_(_pos: String): CommandBuilder {
-        return positioned_as_(PlayerName(_pos))
+    fun positioned_as(_pos: String): CommandBuilder {
+        return positioned_as(PlayerName(_pos))
     }
 
     /**
-     * @see com.zacklukem.mcdsl.CommandBuilder.positioned_as_
+     * @see com.zacklukem.mcdsl.CommandBuilder.positioned_as
      */
     @Suppress("FunctionName")
-    fun positioned_as_(_pos: String, c: CommandBuilder.() -> Unit) {
-        positioned_as_(PlayerName(_pos), c)
+    fun positioned_as(_pos: String, c: CommandBuilder.() -> Unit) {
+        positioned_as(PlayerName(_pos), c)
     }
 
     /**
      * Creates one or more execute commands positioned as a given entity
      *
-     * This can be nested with [if_], [as_], [align_], [anchored_], [at_], [in_], [facing_], [on_], [positioned_],
-     * [positioned_as_], [positioned_over_], [rotated_], [rotated_as_] and [summon_] to create more complex conditions
+     * This can be nested with [if_], [as_], [align], [anchored], [at], [in_], [facing], [on], [positioned],
+     * [positioned_as], [positioned_over], [rotated], [rotated_as] and [summon] to create more complex conditions
      *
      * Example:
      * ```
@@ -572,15 +572,15 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
      * ```
      */
     @Suppress("FunctionName")
-    fun positioned_as_(_pos: EntityArg, c: CommandBuilder.() -> Unit) {
-        c(positioned_as_(_pos))
+    fun positioned_as(_pos: EntityArg, c: CommandBuilder.() -> Unit) {
+        c(positioned_as(_pos))
     }
 
     /**
-     * @see com.zacklukem.mcdsl.CommandBuilder.positioned_as_
+     * @see com.zacklukem.mcdsl.CommandBuilder.positioned_as
      */
     @Suppress("FunctionName")
-    fun positioned_as_(_pos: EntityArg): CommandBuilder {
+    fun positioned_as(_pos: EntityArg): CommandBuilder {
         val builder = CommandBuilder(ns)
         builder.addExecuteCallback = { modifier, cmd ->
             addExecute("positioned as $_pos $modifier", cmd)
@@ -594,8 +594,8 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
     /**
      * Creates one or more execute commands positioned over a heightmap
      *
-     * This can be nested with [if_], [as_], [align_], [anchored_], [at_], [in_], [facing_], [on_], [positioned_],
-     * [positioned_as_], [positioned_over_], [rotated_], [rotated_as_] and [summon_] to create more complex conditions
+     * This can be nested with [if_], [as_], [align], [anchored], [at], [in_], [facing], [on], [positioned],
+     * [positioned_as], [positioned_over], [rotated], [rotated_as] and [summon] to create more complex conditions
      *
      * Example:
      * ```
@@ -611,15 +611,15 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
      * ```
      */
     @Suppress("FunctionName")
-    fun positioned_over_(_pos: HeightmapArg, c: CommandBuilder.() -> Unit) {
-        c(positioned_over_(_pos))
+    fun positioned_over(_pos: HeightmapArg, c: CommandBuilder.() -> Unit) {
+        c(positioned_over(_pos))
     }
 
     /**
-     * @see com.zacklukem.mcdsl.CommandBuilder.positioned_over_
+     * @see com.zacklukem.mcdsl.CommandBuilder.positioned_over
      */
     @Suppress("FunctionName")
-    fun positioned_over_(_pos: HeightmapArg): CommandBuilder {
+    fun positioned_over(_pos: HeightmapArg): CommandBuilder {
         val builder = CommandBuilder(ns)
         builder.addExecuteCallback = { modifier, cmd ->
             addExecute("positioned over $_pos $modifier", cmd)
@@ -633,8 +633,8 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
     /**
      * Creates one or more execute commands rotated at a given rotation
      *
-     * This can be nested with [if_], [as_], [align_], [anchored_], [at_], [in_], [facing_], [on_], [positioned_],
-     * [positioned_as_], [positioned_over_], [rotated_], [rotated_as_] and [summon_] to create more complex conditions
+     * This can be nested with [if_], [as_], [align], [anchored], [at], [in_], [facing], [on], [positioned],
+     * [positioned_as], [positioned_over], [rotated], [rotated_as] and [summon] to create more complex conditions
      *
      * Example:
      * ```
@@ -650,15 +650,15 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
      * ```
      */
     @Suppress("FunctionName")
-    fun rotated_(_pos: Rotation, c: CommandBuilder.() -> Unit) {
-        c(rotated_(_pos))
+    fun rotated(_pos: Rotation, c: CommandBuilder.() -> Unit) {
+        c(rotated(_pos))
     }
 
     /**
-     * @see com.zacklukem.mcdsl.CommandBuilder.rotated_
+     * @see com.zacklukem.mcdsl.CommandBuilder.rotated
      */
     @Suppress("FunctionName")
-    fun rotated_(_pos: Rotation): CommandBuilder {
+    fun rotated(_pos: Rotation): CommandBuilder {
         val builder = CommandBuilder(ns)
         builder.addExecuteCallback = { modifier, cmd ->
             addExecute("rotated $_pos $modifier", cmd)
@@ -670,26 +670,26 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
     }
 
     /**
-     * @see com.zacklukem.mcdsl.CommandBuilder.rotated_as_
+     * @see com.zacklukem.mcdsl.CommandBuilder.rotated_as
      */
     @Suppress("FunctionName")
-    fun rotated_as_(_pos: String): CommandBuilder {
-        return rotated_as_(PlayerName(_pos))
+    fun rotated_as(_pos: String): CommandBuilder {
+        return rotated_as(PlayerName(_pos))
     }
 
     /**
-     * @see com.zacklukem.mcdsl.CommandBuilder.rotated_as_
+     * @see com.zacklukem.mcdsl.CommandBuilder.rotated_as
      */
     @Suppress("FunctionName")
-    fun rotated_as_(_pos: String, c: CommandBuilder.() -> Unit) {
-        rotated_as_(PlayerName(_pos), c)
+    fun rotated_as(_pos: String, c: CommandBuilder.() -> Unit) {
+        rotated_as(PlayerName(_pos), c)
     }
 
     /**
      * Creates one or more execute commands rotated as a given entity
      *
-     * This can be nested with [if_], [as_], [align_], [anchored_], [at_], [in_], [facing_], [on_], [positioned_],
-     * [positioned_as_], [positioned_over_], [rotated_], [rotated_as_] and [summon_] to create more complex conditions
+     * This can be nested with [if_], [as_], [align], [anchored], [at], [in_], [facing], [on], [positioned],
+     * [positioned_as], [positioned_over], [rotated], [rotated_as] and [summon] to create more complex conditions
      *
      * Example:
      * ```
@@ -705,15 +705,15 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
      * ```
      */
     @Suppress("FunctionName")
-    fun rotated_as_(_pos: EntityArg, c: CommandBuilder.() -> Unit) {
-        c(rotated_as_(_pos))
+    fun rotated_as(_pos: EntityArg, c: CommandBuilder.() -> Unit) {
+        c(rotated_as(_pos))
     }
 
     /**
-     * @see com.zacklukem.mcdsl.CommandBuilder.rotated_as_
+     * @see com.zacklukem.mcdsl.CommandBuilder.rotated_as
      */
     @Suppress("FunctionName")
-    fun rotated_as_(_pos: EntityArg): CommandBuilder {
+    fun rotated_as(_pos: EntityArg): CommandBuilder {
         val builder = CommandBuilder(ns)
         builder.addExecuteCallback = { modifier, cmd ->
             addExecute("rotated as $_pos $modifier", cmd)
@@ -727,8 +727,8 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
     /**
      * Creates one or more execute commands summoning an entity and executing a command as that entity
      *
-     * This can be nested with [if_], [as_], [align_], [anchored_], [at_], [in_], [facing_], [on_], [positioned_],
-     * [positioned_as_], [positioned_over_], [rotated_], [rotated_as_] and [summon_] to create more complex conditions
+     * This can be nested with [if_], [as_], [align], [anchored], [at], [in_], [facing], [on], [positioned],
+     * [positioned_as], [positioned_over], [rotated], [rotated_as] and [summon] to create more complex conditions
      *
      * Example:
      * ```
@@ -744,15 +744,15 @@ class CommandBuilder internal constructor(private val ns: Namespace) {
      * ```
      */
     @Suppress("FunctionName")
-    fun summon_(_entity: String, c: CommandBuilder.() -> Unit) {
-        c(summon_(_entity))
+    fun summon(_entity: String, c: CommandBuilder.() -> Unit) {
+        c(summon(_entity))
     }
 
     /**
-     * @see com.zacklukem.mcdsl.CommandBuilder.summon_
+     * @see com.zacklukem.mcdsl.CommandBuilder.summon
      */
     @Suppress("FunctionName")
-    fun summon_(_entity: String): CommandBuilder {
+    fun summon(_entity: String): CommandBuilder {
         val builder = CommandBuilder(ns)
         builder.addExecuteCallback = { modifier, cmd ->
             addExecute("summon $_entity $modifier", cmd)
