@@ -2,9 +2,12 @@ package com.zacklukem.mcdsl
 
 import com.zacklukem.mcdsl.commands.Bossbar
 import com.zacklukem.mcdsl.data.Advancement
+import com.zacklukem.mcdsl.data.Recipe
 import com.zacklukem.mcdsl.util.*
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.encodeToJsonElement
+import kotlinx.serialization.json.jsonObject
 import java.io.File
 import java.nio.file.Path
 import java.util.*
@@ -24,6 +27,7 @@ import java.util.*
  * ```
  */
 class Namespace internal constructor(private val parent: Datapack, val namespace: String) {
+    private val recipes = mutableListOf<Pair<String, Recipe>>()
     private val advancements = mutableListOf<Pair<String, Advancement>>()
     private val functions = mutableListOf<Func>()
 
@@ -197,16 +201,33 @@ class Namespace internal constructor(private val parent: Datapack, val namespace
             }
         }
 
+        val json = Json {
+            classDiscriminator = "kotlin_class_discriminator"
+            prettyPrint = true
+        }
+
         if (advancements.isNotEmpty()) {
             File("$dataPack/data/$namespace/advancements").mkdirs()
             for ((id, advancement) in advancements) {
                 val f = File("$dataPack/data/$namespace/advancements/$id.json")
-                val s = Json.encodeToString(advancement)
+                val o = json.encodeToJsonElement(advancement).jsonObject.minus("kotlin_class_discriminator")
+                val s = json.encodeToString(o)
+
+                f.writeText(s)
+            }
+        }
+
+        if (recipes.isNotEmpty()) {
+            File("$dataPack/data/$namespace/recipes").mkdirs()
+            for ((id, recipe) in recipes) {
+                val f = File("$dataPack/data/$namespace/recipes/$id.json")
+                val o = json.encodeToJsonElement(recipe).jsonObject.minus("kotlin_class_discriminator")
+                val s = json.encodeToString(o)
+
                 f.writeText(s)
             }
         }
     }
-
 
     /**
      * Creates a new minecraft advancement in this namespace
@@ -215,6 +236,16 @@ class Namespace internal constructor(private val parent: Datapack, val namespace
      */
     fun advancement(id: String, advancement: Advancement): String {
         advancements.add(Pair(id, advancement))
+        return "$namespace:$id"
+    }
+
+    /**
+     * Creates a new minecraft recipe in this namespace
+     *
+     * Returns the tag for this namespace
+     */
+    fun recipe(id: String, recipe: Recipe): String {
+        recipes.add(Pair(id, recipe))
         return "$namespace:$id"
     }
 }

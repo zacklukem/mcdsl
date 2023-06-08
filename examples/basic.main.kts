@@ -2,6 +2,7 @@
 
 import com.zacklukem.mcdsl.*
 import com.zacklukem.mcdsl.data.*;
+import com.zacklukem.mcdsl.util.*;
 
 val pack = datapack {}
 
@@ -15,7 +16,7 @@ ns.advancement("my_advancement", Advancement(
     display = Advancement.Display(
         title = "My Advancement",
         description = "This is my advancement",
-        icon = Advancement.Display.Icon("minecraft:stone"),
+        icon = Item("minecraft:stone"),
         showToast = true,
         announceToChat = true,
         hidden = false,
@@ -30,6 +31,15 @@ ns.advancement("my_advancement", Advancement(
     requirements = listOf(
         listOf("my_criterion")
     )
+))
+
+ns.recipe("my_recipe", CraftingShaped(
+    pattern = listOf(
+        listOf(Item("minecraft:stone"), null, null),
+        listOf(Item("minecraft:cobblestone"), Item("minecraft:cobblestone"), Item("minecraft:stone")),
+        listOf(Item("minecraft:oak_log"), Item("minecraft:stone"), Item("minecraft:stone")),
+    ),
+    result = CraftingResult(item = "minecraft:cobblestone")
 ))
 
 pack.print("out/basic")

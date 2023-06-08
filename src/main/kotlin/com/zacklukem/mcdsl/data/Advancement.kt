@@ -1,9 +1,8 @@
 package com.zacklukem.mcdsl.data
 
+import com.zacklukem.mcdsl.util.Item
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 
 /**
@@ -27,7 +26,7 @@ data class Advancement(
 
     @Serializable
     data class Display(
-        val icon: Icon,
+        val icon: Item,
         val title: String,
         val description: String,
         val frame: String = "task",
@@ -38,11 +37,6 @@ data class Advancement(
         val announceToChat: Boolean = true,
         val hidden: Boolean = false,
     ) {
-        @Serializable
-        data class Icon(
-            val item: String,
-            val nbt: String? = null,
-        )
     }
 
     @Serializable

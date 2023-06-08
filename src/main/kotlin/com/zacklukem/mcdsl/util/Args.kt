@@ -1,6 +1,13 @@
 package com.zacklukem.mcdsl.util
 
+import kotlinx.serialization.Serializable
 import java.util.UUID
+
+@Serializable
+data class Item(
+    val item: String,
+    val nbt: String? = null,
+)
 
 /**
  * Minecraft entity anchors (feet, eyes)
