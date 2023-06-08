@@ -53,20 +53,3 @@ data class Advancement(
         val function: String? = null,
     )
 }
-
-fun asdf() {
-    val adv = Advancement(
-        display = Advancement.Display(
-            icon = Advancement.Display.Icon("asdf"),
-            title = "asdf",
-            description = "asdf",
-        ),
-        criteria = mapOf(
-            "asdf" to Advancement.Criterion(
-                trigger = "asdf",
-            )
-        )
-    )
-
-    println(Json.encodeToString(adv))
-}
