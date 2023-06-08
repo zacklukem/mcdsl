@@ -8,8 +8,12 @@ val pack = datapack {}
 
 val ns = pack.namespace("test")
 
+val myVar = ns.varInt("my_var")
+
 ns.onLoad {
-    cmd("say Hello World!")
+    if_(myVar eq 0) {
+        cmd("say Hello World!")
+    }
 }
 
 ns.advancement("my_advancement", Advancement(

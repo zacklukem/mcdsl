@@ -1,12 +1,19 @@
 package com.zacklukem.mcdsl.util
 
-class VarInt(val namespace: String, val name: String) {
+import com.zacklukem.mcdsl.CommandBuilder
+
+
+class VarInt(val namespace: String, val name: String): CommandBuilder.Storable {
     fun set(value: Int): String {
         return "scoreboard players set $name $namespace $value"
     }
 
-    fun eq(value: Int): Condition {
+    infix fun eq(value: Int): Condition {
         return con("score $name $namespace matches $value")
+    }
+
+    override fun executeStore(): String {
+        return "score $name $namespace"
     }
 }
 
@@ -14,12 +21,12 @@ interface Discriminant {
     fun discriminant(): Int
 }
 
-class VarEnum<T : Discriminant>(val namespace: String, val name: String) {
+class VarEnum<T : Discriminant>(val namespace: String, val name: String): CommandBuilder.Storable {
     fun set(value: T): String {
         return "scoreboard players set $name $namespace ${value.discriminant()}"
     }
 
-    fun eq(value: T): Condition {
+    infix fun eq(value: T): Condition {
         return con("score $name $namespace matches ${value.discriminant()}")
     }
 
@@ -29,5 +36,9 @@ class VarEnum<T : Discriminant>(val namespace: String, val name: String) {
 
     fun init(): String {
         return "scoreboard objectives add $name dummy"
+    }
+
+    override fun executeStore(): String {
+        return "score $name $namespace"
     }
 }

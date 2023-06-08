@@ -33,7 +33,7 @@ val myLever = Lever(pos + Coord(10, 0, 0), Dir.NORTH)
 
 val func = ns.function {
     cmd("say Hello Function!")
-    if_(myVar.eq(5) and myLever.isOn()) {
+    if_((myVar eq 5) and myLever.isOn()) {
         cmd("say myVar is 5!")
     }
 }

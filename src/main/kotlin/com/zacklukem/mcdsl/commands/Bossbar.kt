@@ -1,5 +1,7 @@
 package com.zacklukem.mcdsl.commands
 
+import com.zacklukem.mcdsl.CommandBuilder
+
 enum class BossbarSetting(private val repr: String) {
     MAX("max"),
     PLAYERS("players"),
@@ -32,7 +34,7 @@ enum class Style(private val repr: String) {
     override fun toString(): String = repr
 }
 
-class Bossbar(private val namespace: String, private val name: String) {
+class Bossbar(private val namespace: String, private val name: String): CommandBuilder.Storable {
     private val fullName get() = "$namespace:$name"
 
     fun add(displayName: String): String {
@@ -81,5 +83,13 @@ class Bossbar(private val namespace: String, private val name: String) {
 
     fun setInvisible(): String {
         return setVisible(false)
+    }
+
+    fun storeMax(): String {
+        return "bossbar $fullName max"
+    }
+
+    override fun executeStore(): String {
+        return "bossbar $fullName value"
     }
 }
