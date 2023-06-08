@@ -4,6 +4,19 @@ Minecraft Datapack Scripting Language or Minecraft Domain Specific Language or w
 
 A Kotlin DSL for creating Minecraft Datapacks
 
+## Install
+
+build.gradle.kts:
+```kotlin
+repositories {
+    maven(url = "https://jitpack.io")
+}
+
+dependencies {
+    implementation("com.zacklukem:mcdsl:main-SNAPSHOT")
+}
+```
+
 ## Example
 
 ```kotlin

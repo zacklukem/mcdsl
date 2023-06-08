@@ -1,5 +1,6 @@
 package com.zacklukem.mcdsl
 
+import com.zacklukem.mcdsl.data.Advancement
 import java.io.File
 import java.nio.file.Path
 import kotlin.io.path.Path

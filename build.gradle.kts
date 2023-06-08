@@ -11,7 +11,8 @@ repositories {
 }
 
 plugins {
-    kotlin("jvm") version "1.6.21"
+    kotlin("jvm") version "1.8.21"
+    kotlin("plugin.serialization") version "1.8.21"
     id("org.jetbrains.dokka") version "1.8.20"
     `java-library`
     `maven-publish`
@@ -19,10 +20,17 @@ plugins {
 
 dependencies {
     testImplementation(kotlin("test"))
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
 }
 
 tasks.test {
     useJUnitPlatform()
+}
+
+tasks.withType<JavaCompile>() {
+    sourceCompatibility = "1.8"
+    targetCompatibility = "1.8"
 }
 
 tasks.withType<KotlinCompile> {
